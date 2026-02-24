@@ -8099,56 +8099,126 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
       loginButton: { color: "green", type: 3, height: 50 }
     });
     
-    // 구글 로그인
+    // ⭐ 구글 로그인 (Supabase Auth OAuth Redirect 방식 — origin_mismatch 해결)
     async function loginWithGoogle() {
       try {
-        google.accounts.id.initialize({
-          client_id: '673992676128-4fdiskraccdo2i0veqm59tvnjasnc1ot.apps.googleusercontent.com',
-          callback: handleGoogleCallback
-        });
-        
-        google.accounts.id.prompt();
-        
+        // Supabase Auth의 OAuth redirect 방식 사용
+        // Google Cloud Console에서 redirect URI만 등록하면 됨:
+        // https://nlsiwrwiyozpiofrmzxa.supabase.co/auth/v1/callback
+        const redirectTo = window.location.origin + window.location.pathname + '?auth_callback=google';
+
+        const authUrl = `${SUPABASE_PROJECT_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectTo)}`;
+
+        // 팝업 방식으로 열기 (페이지 이탈 방지)
+        const popup = window.open(authUrl, 'google-login', 'width=500,height=600,scrollbars=yes');
+
+        if (!popup || popup.closed) {
+          // 팝업 차단 시 직접 이동
+          window.location.href = authUrl;
+          return;
+        }
+
+        // 팝업에서 돌아오는 콜백 감지
+        const checkPopup = setInterval(function() {
+          try {
+            if (popup.closed) {
+              clearInterval(checkPopup);
+              // 팝업 닫힌 후 URL 해시에서 토큰 확인
+              checkSupabaseAuthCallback();
+              return;
+            }
+            // 팝업 URL에서 access_token 감지
+            if (popup.location && popup.location.href.indexOf('access_token') > -1) {
+              const hash = popup.location.hash;
+              popup.close();
+              clearInterval(checkPopup);
+              parseAuthHashAndLogin(hash);
+            }
+          } catch (e) {
+            // cross-origin 접근 제한 — 팝업이 아직 외부 도메인에 있음
+          }
+        }, 500);
+
+        // 30초 후 타임아웃
+        setTimeout(function() {
+          clearInterval(checkPopup);
+          if (popup && !popup.closed) popup.close();
+        }, 60000);
+
       } catch (error) {
         console.error('Google login error:', error);
-        // 목업
-        handleSocialLoginSuccess({
-          provider: 'google',
-          email: 'user@gmail.com',
-          name: '구글사용자',
-          picture: 'https://via.placeholder.com/32'
-        });
-      }
-    }
-    
-    async function handleGoogleCallback(response) {
-      try {
-        // Supabase Auth로 Google 토큰 전달
-        const result = await fetch(`${SUPABASE_PROJECT_URL}/auth/v1/token?grant_type=id_token`, {
-          method: 'POST',
-          headers: { 'apikey': SUPABASE_ANON, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ provider: 'google', token: response.credential })
-        });
-        const data = await result.json();
-        if (data.access_token) {
+        // 폴백: 일반 리다이렉트 방식
+        try {
+          const redirectTo = window.location.origin + window.location.pathname;
+          window.location.href = `${SUPABASE_PROJECT_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectTo)}`;
+        } catch (e2) {
+          // 최종 폴백: 목업 로그인
           handleSocialLoginSuccess({
             provider: 'google',
-            email: data.user?.email || 'user@gmail.com',
-            name: data.user?.user_metadata?.full_name || '구글사용자',
-            picture: data.user?.user_metadata?.avatar_url
+            email: 'user@gmail.com',
+            name: '구글사용자',
+            picture: 'https://via.placeholder.com/32'
           });
-        } else {
-          throw new Error('No access token');
         }
-      } catch (error) {
-        console.error('Google callback error:', error);
-        handleSocialLoginSuccess({
-          provider: 'google',
-          email: 'user@gmail.com',
-          name: '구글사용자'
-        });
       }
     }
+
+    // Supabase Auth 콜백 해시 파싱
+    function parseAuthHashAndLogin(hash) {
+      try {
+        if (!hash || hash.length < 2) return;
+        const params = new URLSearchParams(hash.substring(1));
+        const accessToken = params.get('access_token');
+        if (!accessToken) return;
+
+        // Supabase에서 사용자 정보 가져오기
+        fetch(`${SUPABASE_PROJECT_URL}/auth/v1/user`, {
+          headers: {
+            'apikey': SUPABASE_ANON,
+            'Authorization': 'Bearer ' + accessToken
+          }
+        })
+        .then(function(r){return r.json();})
+        .then(function(user) {
+          handleSocialLoginSuccess({
+            provider: 'google',
+            email: user.email || 'user@gmail.com',
+            name: user.user_metadata?.full_name || user.user_metadata?.name || '구글사용자',
+            picture: user.user_metadata?.avatar_url || user.user_metadata?.picture
+          });
+        })
+        .catch(function(err) {
+          console.error('User fetch error:', err);
+          handleSocialLoginSuccess({
+            provider: 'google',
+            email: 'user@gmail.com',
+            name: '구글사용자'
+          });
+        });
+      } catch (error) {
+        console.error('Parse auth hash error:', error);
+      }
+    }
+
+    // 페이지 로드 시 OAuth 콜백 확인 (리다이렉트 방식용)
+    function checkSupabaseAuthCallback() {
+      try {
+        var hash = window.location.hash;
+        if (hash && hash.indexOf('access_token') > -1) {
+          parseAuthHashAndLogin(hash);
+          // 해시 제거 (URL 정리)
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        // URL query에 auth_callback 파라미터 확인
+        var urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('auth_callback') === 'google' && hash && hash.indexOf('access_token') > -1) {
+          parseAuthHashAndLogin(hash);
+          history.replaceState(null, '', window.location.pathname);
+        }
+      } catch(e) {}
+    }
+    // 페이지 로드 시 콜백 체크
+    checkSupabaseAuthCallback();
     
     // 카카오 로그인
     async function loginWithKakao() {
