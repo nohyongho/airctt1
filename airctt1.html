@@ -7325,46 +7325,153 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
       animateGame();
     }
     
+    // 🖼️ roundRect 폴리필 (구형 브라우저 대응)
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        if (typeof r === 'number') r = [r, r, r, r];
+        const [tl, tr, br, bl] = r;
+        this.moveTo(x + tl, y);
+        this.lineTo(x + w - tr, y);
+        this.quadraticCurveTo(x + w, y, x + w, y + tr);
+        this.lineTo(x + w, y + h - br);
+        this.quadraticCurveTo(x + w, y + h, x + w - br, y + h);
+        this.lineTo(x + bl, y + h);
+        this.quadraticCurveTo(x, y + h, x, y + h - bl);
+        this.lineTo(x, y + tl);
+        this.quadraticCurveTo(x, y, x + tl, y);
+        this.closePath();
+        return this;
+      };
+    }
+
+    // 🖼️ 쿠폰 캔버스 텍스처 생성 (이모지+할인+가게명)
+    function createCouponCanvasTexture(couponData) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 360;
+      canvas.height = 450;
+      const ctx = canvas.getContext('2d');
+
+      // 희귀도별 그라데이션 배경
+      const rarityGrads = {
+        common: ['#374151', '#4b5563'],
+        rare: ['#1e3a5f', '#2563eb'],
+        epic: ['#4c1d95', '#7c3aed'],
+        legendary: ['#78350f', '#f59e0b'],
+        mythic: ['#7f1d1d', '#ef4444']
+      };
+      const colors = rarityGrads[couponData.rarity] || rarityGrads.common;
+      const grad = ctx.createLinearGradient(0, 0, 0, 450);
+      grad.addColorStop(0, colors[0]);
+      grad.addColorStop(1, colors[1]);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, 360, 450, 20);
+      ctx.fill();
+
+      // 테두리 발광
+      ctx.strokeStyle = colors[1];
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.roundRect(4, 4, 352, 442, 18);
+      ctx.stroke();
+
+      // 이모지
+      ctx.font = '80px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(couponData.store_emoji || '🎫', 180, 120);
+
+      // 할인 정보
+      ctx.font = 'bold 60px sans-serif';
+      ctx.fillStyle = '#fbbf24';
+      ctx.shadowColor = '#000';
+      ctx.shadowBlur = 8;
+      const discText = couponData.discount_type === 'percentage' ?
+        couponData.discount_value + '%' : '₩' + couponData.discount_value;
+      ctx.fillText(discText, 180, 220);
+      ctx.shadowBlur = 0;
+
+      // "할인" 라벨
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillStyle = '#fde68a';
+      ctx.fillText('할인 쿠폰', 180, 260);
+
+      // 가게명
+      ctx.font = 'bold 28px sans-serif';
+      ctx.fillStyle = '#ffffff';
+      const storeName = couponData.store_name || couponData.title || '매장';
+      // 긴 이름 자르기
+      const displayName = storeName.length > 10 ? storeName.substring(0, 10) + '...' : storeName;
+      ctx.fillText(displayName, 180, 320);
+
+      // 쿠폰 제목
+      ctx.font = '18px sans-serif';
+      ctx.fillStyle = '#d1d5db';
+      const title = (couponData.title || '').length > 14 ? couponData.title.substring(0, 14) + '...' : (couponData.title || '');
+      ctx.fillText(title, 180, 360);
+
+      // 희귀도 뱃지
+      const rarityNames = { common:'COMMON', rare:'RARE', epic:'EPIC', legendary:'LEGENDARY', mythic:'MYTHIC' };
+      ctx.font = 'bold 16px sans-serif';
+      const badgeW = ctx.measureText(rarityNames[couponData.rarity] || 'COMMON').width + 16;
+      ctx.fillStyle = colors[1] + 'cc';
+      ctx.beginPath();
+      ctx.roundRect(180 - badgeW/2, 385, badgeW, 28, 8);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.fillText(rarityNames[couponData.rarity] || 'COMMON', 180, 405);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.encoding = THREE.sRGBEncoding;
+      return texture;
+    }
+
     function createCoupons() {
       coupons = [];
-      
+
       // ⭐ 승인된 매장 쿠폰만 게임에 배포
       const approvedCoupons = gameIssuedCoupons.filter(c => c.status === 'approved' && c.remaining > 0);
-      
+
       approvedCoupons.forEach((issuedCoupon, index) => {
-        // 쿠폰 티켓 모양 (직사각형 + 둥근 모서리)
-        const ticketShape = new THREE.Shape();
-        const width = 6;
-        const height = 3;
-        const radius = 0.3;
-        
-        ticketShape.moveTo(-width/2 + radius, -height/2);
-        ticketShape.lineTo(width/2 - radius, -height/2);
-        ticketShape.quadraticCurveTo(width/2, -height/2, width/2, -height/2 + radius);
-        ticketShape.lineTo(width/2, height/2 - radius);
-        ticketShape.quadraticCurveTo(width/2, height/2, width/2 - radius, height/2);
-        ticketShape.lineTo(-width/2 + radius, height/2);
-        ticketShape.quadraticCurveTo(-width/2, height/2, -width/2, height/2 - radius);
-        ticketShape.lineTo(-width/2, -height/2 + radius);
-        ticketShape.quadraticCurveTo(-width/2, -height/2, -width/2 + radius, -height/2);
-        
-        const geometry = new THREE.ExtrudeGeometry(ticketShape, {
-          depth: 0.3,
-          bevelEnabled: true,
-          bevelThickness: 0.1,
-          bevelSize: 0.1,
-          bevelSegments: 2
-        });
-        
         const rarityColor = rarities[issuedCoupon.rarity].color;
-        const material = new THREE.MeshStandardMaterial({
+
+        // 🖼️ 캔버스 텍스처로 쿠폰 카드 생성!
+        const canvasTexture = createCouponCanvasTexture(issuedCoupon);
+        const frontMat = new THREE.MeshStandardMaterial({
+          map: canvasTexture,
+          emissive: rarityColor,
+          emissiveIntensity: 0.15,
+          metalness: 0.3,
+          roughness: 0.4
+        });
+        const sideMat = new THREE.MeshStandardMaterial({
           color: rarityColor,
           emissive: rarityColor,
-          emissiveIntensity: 0.4,
-          metalness: 0.6,
-          roughness: 0.3
+          emissiveIntensity: 0.5,
+          metalness: 0.7,
+          roughness: 0.2
         });
-        
+        const material = [sideMat, frontMat, sideMat];
+
+        // 카드형 지오메트리 (4:5 비율)
+        const cardShape = new THREE.Shape();
+        const w = 4, h = 5, r = 0.3;
+        cardShape.moveTo(-w/2 + r, -h/2);
+        cardShape.lineTo(w/2 - r, -h/2);
+        cardShape.quadraticCurveTo(w/2, -h/2, w/2, -h/2 + r);
+        cardShape.lineTo(w/2, h/2 - r);
+        cardShape.quadraticCurveTo(w/2, h/2, w/2 - r, h/2);
+        cardShape.lineTo(-w/2 + r, h/2);
+        cardShape.quadraticCurveTo(-w/2, h/2, -w/2, h/2 - r);
+        cardShape.lineTo(-w/2, -h/2 + r);
+        cardShape.quadraticCurveTo(-w/2, -h/2, -w/2 + r, -h/2);
+        const geometry = new THREE.ExtrudeGeometry(cardShape, {
+          depth: 0.2,
+          bevelEnabled: true,
+          bevelThickness: 0.08,
+          bevelSize: 0.08,
+          bevelSegments: 3
+        });
+
         const coupon = new THREE.Mesh(geometry, material);
         
         coupon.position.x = (Math.random() - 0.5) * 40;
@@ -7412,44 +7519,35 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
           randomCoupon = { ...gameIssuedCoupons[4] }; // 100% 무료!
         }
         
-        // 티켓 모양 생성
-        const ticketShape = new THREE.Shape();
-        const width = 6;
-        const height = 3;
-        const radius = 0.3;
-        
-        ticketShape.moveTo(-width/2 + radius, -height/2);
-        ticketShape.lineTo(width/2 - radius, -height/2);
-        ticketShape.quadraticCurveTo(width/2, -height/2, width/2, -height/2 + radius);
-        ticketShape.lineTo(width/2, height/2 - radius);
-        ticketShape.quadraticCurveTo(width/2, height/2, width/2 - radius, height/2);
-        ticketShape.lineTo(-width/2 + radius, height/2);
-        ticketShape.quadraticCurveTo(-width/2, height/2, -width/2, height/2 - radius);
-        ticketShape.lineTo(-width/2, -height/2 + radius);
-        ticketShape.quadraticCurveTo(-width/2, -height/2, -width/2 + radius, -height/2);
-        
-        const geometry = new THREE.ExtrudeGeometry(ticketShape, {
-          depth: 0.3,
-          bevelEnabled: true,
-          bevelThickness: 0.1,
-          bevelSize: 0.1,
-          bevelSegments: 2
+        // 🖼️ 캔버스 텍스처 쿠폰 카드
+        const fillRarityColor = rarities[rarity].color;
+        const fillCouponData = { ...randomCoupon, rarity: rarity };
+        const fillTexture = createCouponCanvasTexture(fillCouponData);
+        const fillFrontMat = new THREE.MeshStandardMaterial({
+          map: fillTexture, emissive: fillRarityColor, emissiveIntensity: 0.15, metalness: 0.3, roughness: 0.4
         });
-        
-        const material = new THREE.MeshStandardMaterial({
-          color: rarities[rarity].color,
-          emissive: rarities[rarity].color,
-          emissiveIntensity: 0.4,
-          metalness: 0.6,
-          roughness: 0.3
+        const fillSideMat = new THREE.MeshStandardMaterial({
+          color: fillRarityColor, emissive: fillRarityColor, emissiveIntensity: 0.5, metalness: 0.7, roughness: 0.2
         });
-        
-        const coupon = new THREE.Mesh(geometry, material);
-        
+        const fillMaterial = [fillSideMat, fillFrontMat, fillSideMat];
+
+        const fillShape = new THREE.Shape();
+        const fw = 4, fh = 5, fr = 0.3;
+        fillShape.moveTo(-fw/2+fr,-fh/2); fillShape.lineTo(fw/2-fr,-fh/2);
+        fillShape.quadraticCurveTo(fw/2,-fh/2,fw/2,-fh/2+fr); fillShape.lineTo(fw/2,fh/2-fr);
+        fillShape.quadraticCurveTo(fw/2,fh/2,fw/2-fr,fh/2); fillShape.lineTo(-fw/2+fr,fh/2);
+        fillShape.quadraticCurveTo(-fw/2,fh/2,-fw/2,fh/2-fr); fillShape.lineTo(-fw/2,-fh/2+fr);
+        fillShape.quadraticCurveTo(-fw/2,-fh/2,-fw/2+fr,-fh/2);
+        const fillGeometry = new THREE.ExtrudeGeometry(fillShape, {
+          depth: 0.2, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.08, bevelSegments: 3
+        });
+
+        const coupon = new THREE.Mesh(fillGeometry, fillMaterial);
+
         coupon.position.x = (Math.random() - 0.5) * 40;
         coupon.position.y = Math.random() * 40 - 10;
         coupon.position.z = (Math.random() - 0.5) * 20;
-        
+
         coupon.userData = {
           rarity: rarity,
           fallSpeed: 0.02 + Math.random() * 0.025,
@@ -9600,6 +9698,18 @@ function initializeEnhancedCouponSystem() {
     var sliderVal = document.getElementById('modal-radius-slider').value;
     var km = sliderToRadius(sliderVal);
 
+    // 업로드된 이미지/영상 URL 가져오기
+    var uploadedImageUrl = null;
+    var isVideo = false;
+    var imgEl = document.getElementById('modal-preview-img');
+    var videoEl = document.getElementById('modal-preview-video');
+    if (imgEl && imgEl.src && imgEl.style.display !== 'none' && imgEl.src.indexOf('blob:') === 0) {
+      uploadedImageUrl = imgEl.src;
+    } else if (videoEl && videoEl.src && videoEl.style.display !== 'none' && videoEl.src.indexOf('blob:') === 0) {
+      uploadedImageUrl = videoEl.src;
+      isVideo = true;
+    }
+
     // 새 쿠폰 데이터 생성 (pending 상태 — 관리자 승인 대기)
     var newCoupon = {
       id: Date.now(), name: name,
@@ -9607,7 +9717,9 @@ function initializeEnhancedCouponSystem() {
       discountType: discType, discountValue: discValue, quantity: quantity, used: 0,
       startDate: startDate, endDate: endDate, status: 'pending',
       rarity: discValue >= 50 ? 'EPIC' : (discValue >= 30 ? 'RARE' : 'COMMON'),
-      radius: km, minPayment: minPayment, maxDiscount: maxDiscount, image: null,
+      radius: km, minPayment: minPayment, maxDiscount: maxDiscount,
+      image: uploadedImageUrl,
+      imageIsVideo: isVideo,
       paymentMethod: window._selectedPayMethod,
       paymentAmount: quantity * 100,
       createdAt: new Date().toISOString()
@@ -9648,7 +9760,7 @@ function initializeEnhancedCouponSystem() {
         remaining: quantity,
         status: 'pending',
         expiry: endDate,
-        image_url: null,
+        image_url: uploadedImageUrl || null,
         website_url: null
       });
     }
@@ -9759,9 +9871,17 @@ function initializeEnhancedCouponSystem() {
       var st = statusMap[c.status] || statusMap.pending;
       var pct = c.quantity > 0 ? Math.round((c.used/c.quantity)*100) : 0;
       var discText = c.discountType==='percent' ? c.discountValue+'%' : c.discountValue.toLocaleString()+'원';
+      // 이미지가 있으면 이미지 표시, 없으면 이모지
+      var thumbHtml = c.image ?
+        '<img src="' + c.image + '" class="w-full h-full object-cover" alt="' + c.name + '">' :
+        (c.imageIsVideo && c.image ? '<video src="' + c.image + '" class="w-full h-full object-cover" autoplay muted loop></video>' :
+        '<span class="text-3xl">🎫</span>');
+      // 승인 버튼 (pending 상태일 때만)
+      var approveBtn = c.status === 'pending' ?
+        '<button onclick="event.stopPropagation();approveManagedCoupon(' + c.id + ')" class="px-3 py-1.5 bg-green-500 hover:bg-green-400 text-white text-xs font-bold rounded-lg transition whitespace-nowrap">✅ 승인</button>' : '';
       return '<div class="bg-gray-800/80 border border-gray-700 rounded-xl p-4 flex items-center gap-4 hover:border-purple-500/50 transition">' +
         '<div class="relative w-20 h-20 rounded-lg bg-gray-700 flex-shrink-0 flex items-center justify-center overflow-hidden">' +
-          '<span class="text-3xl">🎫</span>' +
+          thumbHtml +
           '<span class="absolute top-1 left-1 text-xs font-bold px-1.5 py-0.5 rounded bg-red-500/90 text-white">' + discText + '</span>' +
         '</div>' +
         '<div class="flex-1 min-w-0">' +
@@ -9779,6 +9899,7 @@ function initializeEnhancedCouponSystem() {
         '</div>' +
         '<div class="flex flex-col items-end gap-2 flex-shrink-0">' +
           '<span class="' + st.text + ' text-sm font-bold">' + st.label + '</span>' +
+          approveBtn +
           '<button onclick="deleteManagedCoupon(' + c.id + ')" class="text-gray-500 hover:text-red-400 transition">🗑️</button>' +
         '</div></div>';
     }).join('');
@@ -9795,6 +9916,48 @@ function initializeEnhancedCouponSystem() {
   };
 
   window.filterCouponList = function() { renderCouponManagementList(); };
+
+  // ⭐ 쿠폰 승인 → 게임에 배포!
+  window.approveManagedCoupon = function(id) {
+    var coupon = window.couponManagementData.coupons.find(function(c){ return c.id === id; });
+    if (!coupon) return;
+    if (coupon.status !== 'pending') { showCouponNotification('이미 처리된 쿠폰입니다.', 'info'); return; }
+
+    // 1. 쿠폰 관리 목록에서 상태를 active로 변경
+    coupon.status = 'active';
+
+    // 2. gameIssuedCoupons에서 해당 쿠폰 찾아서 approved로 변경
+    if (typeof gameIssuedCoupons !== 'undefined') {
+      var gameC = gameIssuedCoupons.find(function(gc){ return gc.id === 'new-coupon-' + id; });
+      if (gameC) {
+        gameC.status = 'approved';
+      } else {
+        // gameIssuedCoupons에 없으면 새로 추가
+        var storeId = 'store-001';
+        if (typeof currentUser !== 'undefined' && currentUser && currentUser.store_id) storeId = currentUser.store_id;
+        gameIssuedCoupons.push({
+          id: 'new-coupon-' + id,
+          store_id: storeId,
+          store_name: coupon.name.split(' ')[0],
+          store_emoji: '🏪',
+          title: coupon.name,
+          discount_type: coupon.discountType === 'percent' ? 'percentage' : 'fixed',
+          discount_value: coupon.discountValue,
+          rarity: (coupon.rarity || 'COMMON').toLowerCase(),
+          total_quantity: coupon.quantity,
+          remaining: coupon.quantity,
+          status: 'approved',
+          expiry: coupon.endDate,
+          image_url: coupon.image || null,
+          website_url: null
+        });
+      }
+    }
+
+    renderCouponManagementList();
+    updateCouponStats();
+    showCouponNotification('✅ "' + coupon.name + '" 쿠폰이 승인되었습니다! 게임에 배포됩니다 🎮', 'success');
+  };
 
   window.deleteManagedCoupon = function(id) {
     if (!confirm('이 쿠폰을 삭제하시겠습니까?')) return;
