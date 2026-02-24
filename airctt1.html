@@ -8099,104 +8099,104 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
       loginButton: { color: "green", type: 3, height: 50 }
     });
     
-    // ⭐ 구글 로그인 (Supabase Auth OAuth Redirect 방식 — origin_mismatch 해결)
+    // ⭐ 구글 로그인 (Supabase Auth OAuth Redirect 방식 — 직접 리다이렉트)
     async function loginWithGoogle() {
       try {
+        console.log('[Google OAuth] 로그인 시작...');
+
+        // 현재 상태를 sessionStorage에 저장 (리다이렉트 후 복원용)
+        sessionStorage.setItem('airctt_auth_pending', 'google');
+        sessionStorage.setItem('airctt_auth_time', Date.now().toString());
+
         // Supabase Auth의 OAuth redirect 방식 사용
-        // Google Cloud Console에서 redirect URI만 등록하면 됨:
-        // https://nlsiwrwiyozpiofrmzxa.supabase.co/auth/v1/callback
-        const redirectTo = window.location.origin + window.location.pathname + '?auth_callback=google';
+        // redirect_to: 인증 완료 후 돌아올 URL (우리 페이지)
+        var currentUrl = window.location.origin + window.location.pathname;
+        var redirectTo = currentUrl;
 
-        const authUrl = `${SUPABASE_PROJECT_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectTo)}`;
+        var authUrl = SUPABASE_PROJECT_URL + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(redirectTo);
 
-        // 팝업 방식으로 열기 (페이지 이탈 방지)
-        const popup = window.open(authUrl, 'google-login', 'width=500,height=600,scrollbars=yes');
+        console.log('[Google OAuth] Redirect URL:', authUrl);
+        console.log('[Google OAuth] 돌아올 URL:', redirectTo);
 
-        if (!popup || popup.closed) {
-          // 팝업 차단 시 직접 이동
-          window.location.href = authUrl;
-          return;
-        }
-
-        // 팝업에서 돌아오는 콜백 감지
-        const checkPopup = setInterval(function() {
-          try {
-            if (popup.closed) {
-              clearInterval(checkPopup);
-              // 팝업 닫힌 후 URL 해시에서 토큰 확인
-              checkSupabaseAuthCallback();
-              return;
-            }
-            // 팝업 URL에서 access_token 감지
-            if (popup.location && popup.location.href.indexOf('access_token') > -1) {
-              const hash = popup.location.hash;
-              popup.close();
-              clearInterval(checkPopup);
-              parseAuthHashAndLogin(hash);
-            }
-          } catch (e) {
-            // cross-origin 접근 제한 — 팝업이 아직 외부 도메인에 있음
-          }
-        }, 500);
-
-        // 30초 후 타임아웃
-        setTimeout(function() {
-          clearInterval(checkPopup);
-          if (popup && !popup.closed) popup.close();
-        }, 60000);
+        // 직접 리다이렉트 (가장 안정적)
+        window.location.href = authUrl;
 
       } catch (error) {
-        console.error('Google login error:', error);
-        // 폴백: 일반 리다이렉트 방식
-        try {
-          const redirectTo = window.location.origin + window.location.pathname;
-          window.location.href = `${SUPABASE_PROJECT_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectTo)}`;
-        } catch (e2) {
-          // 최종 폴백: 목업 로그인
-          handleSocialLoginSuccess({
-            provider: 'google',
-            email: 'user@gmail.com',
-            name: '구글사용자',
-            picture: 'https://via.placeholder.com/32'
-          });
-        }
+        console.error('[Google OAuth] Error:', error);
+        sessionStorage.removeItem('airctt_auth_pending');
+        showToast('구글 로그인 오류: ' + error.message, 'error');
       }
     }
 
     // Supabase Auth 콜백 해시 파싱
     function parseAuthHashAndLogin(hash) {
       try {
-        if (!hash || hash.length < 2) return;
-        const params = new URLSearchParams(hash.substring(1));
-        const accessToken = params.get('access_token');
-        if (!accessToken) return;
+        if (!hash || hash.length < 2) return false;
+        console.log('[Google OAuth] 해시 파싱 시작:', hash.substring(0, 50) + '...');
+
+        var params = new URLSearchParams(hash.substring(1));
+        var accessToken = params.get('access_token');
+        var tokenType = params.get('token_type');
+        var refreshToken = params.get('refresh_token');
+
+        if (!accessToken) {
+          console.log('[Google OAuth] access_token 없음');
+          // 에러 확인
+          var error = params.get('error');
+          var errorDesc = params.get('error_description');
+          if (error) {
+            console.error('[Google OAuth] 인증 에러:', error, errorDesc);
+            showToast('구글 로그인 실패: ' + (errorDesc || error), 'error');
+          }
+          return false;
+        }
+
+        console.log('[Google OAuth] access_token 확인됨, 사용자 정보 요청...');
 
         // Supabase에서 사용자 정보 가져오기
-        fetch(`${SUPABASE_PROJECT_URL}/auth/v1/user`, {
+        fetch(SUPABASE_PROJECT_URL + '/auth/v1/user', {
           headers: {
             'apikey': SUPABASE_ANON,
             'Authorization': 'Bearer ' + accessToken
           }
         })
-        .then(function(r){return r.json();})
+        .then(function(r) {
+          console.log('[Google OAuth] User API 응답:', r.status);
+          return r.json();
+        })
         .then(function(user) {
+          console.log('[Google OAuth] 사용자 정보:', user.email, user.user_metadata?.full_name);
+
+          // 세션 토큰 저장 (나중에 Supabase 연동에 사용)
+          if (accessToken) {
+            sessionStorage.setItem('airctt_supabase_token', accessToken);
+            if (refreshToken) sessionStorage.setItem('airctt_supabase_refresh', refreshToken);
+          }
+
           handleSocialLoginSuccess({
             provider: 'google',
             email: user.email || 'user@gmail.com',
             name: user.user_metadata?.full_name || user.user_metadata?.name || '구글사용자',
             picture: user.user_metadata?.avatar_url || user.user_metadata?.picture
           });
+
+          showToast('🎉 구글 로그인 성공! ' + (user.user_metadata?.full_name || user.email), 'success');
         })
         .catch(function(err) {
-          console.error('User fetch error:', err);
+          console.error('[Google OAuth] User fetch error:', err);
+          // 토큰은 있지만 사용자 정보 실패 시 기본값으로 로그인
           handleSocialLoginSuccess({
             provider: 'google',
             email: 'user@gmail.com',
             name: '구글사용자'
           });
+          showToast('구글 로그인 완료 (기본 프로필)', 'success');
         });
+
+        return true;
       } catch (error) {
-        console.error('Parse auth hash error:', error);
+        console.error('[Google OAuth] Parse auth hash error:', error);
+        return false;
       }
     }
 
@@ -8204,20 +8204,54 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
     function checkSupabaseAuthCallback() {
       try {
         var hash = window.location.hash;
+        var search = window.location.search;
+
+        console.log('[OAuth Check] hash:', hash ? hash.substring(0, 60) + '...' : '(없음)');
+        console.log('[OAuth Check] search:', search || '(없음)');
+        console.log('[OAuth Check] pending:', sessionStorage.getItem('airctt_auth_pending'));
+
+        // 해시에 access_token이 있으면 파싱
         if (hash && hash.indexOf('access_token') > -1) {
-          parseAuthHashAndLogin(hash);
-          // 해시 제거 (URL 정리)
-          history.replaceState(null, '', window.location.pathname + window.location.search);
+          console.log('[OAuth Check] ✅ access_token 발견! 로그인 처리 중...');
+          var success = parseAuthHashAndLogin(hash);
+          if (success) {
+            // URL 정리 (해시 + 쿼리 제거)
+            history.replaceState(null, '', window.location.pathname);
+            sessionStorage.removeItem('airctt_auth_pending');
+            sessionStorage.removeItem('airctt_auth_time');
+          }
+          return;
         }
-        // URL query에 auth_callback 파라미터 확인
-        var urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('auth_callback') === 'google' && hash && hash.indexOf('access_token') > -1) {
-          parseAuthHashAndLogin(hash);
+
+        // 해시에 error가 있으면 에러 표시
+        if (hash && hash.indexOf('error') > -1) {
+          var errorParams = new URLSearchParams(hash.substring(1));
+          var error = errorParams.get('error');
+          var errorDesc = errorParams.get('error_description');
+          console.error('[OAuth Check] ❌ 인증 에러:', error, errorDesc);
+          showToast('구글 로그인 실패: ' + (errorDesc || error), 'error');
           history.replaceState(null, '', window.location.pathname);
+          sessionStorage.removeItem('airctt_auth_pending');
+          return;
         }
-      } catch(e) {}
+
+        // pending 상태이지만 토큰 없는 경우 (타임아웃 체크)
+        var pending = sessionStorage.getItem('airctt_auth_pending');
+        var authTime = sessionStorage.getItem('airctt_auth_time');
+        if (pending && authTime) {
+          var elapsed = Date.now() - parseInt(authTime);
+          if (elapsed > 120000) { // 2분 타임아웃
+            console.log('[OAuth Check] ⏰ 인증 타임아웃 (2분 초과)');
+            sessionStorage.removeItem('airctt_auth_pending');
+            sessionStorage.removeItem('airctt_auth_time');
+          }
+        }
+
+      } catch(e) {
+        console.error('[OAuth Check] Error:', e);
+      }
     }
-    // 페이지 로드 시 콜백 체크
+    // 페이지 로드 시 콜백 체크 (즉시 실행)
     checkSupabaseAuthCallback();
     
     // 카카오 로그인
