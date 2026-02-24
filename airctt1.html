@@ -469,6 +469,231 @@
       text-shadow: 0 0 10px rgba(34, 211, 238, 0.8);
     }
 
+    /* ═══ 🎮 Stage 1 보강 CSS ═══ */
+
+    /* 콤보 게이지 바 */
+    .combo-gauge-container {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      z-index: 1001;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .combo-gauge-container.visible { opacity: 1; }
+    .combo-gauge-label {
+      color: #fbbf24;
+      font-size: 0.85rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 4px;
+      text-shadow: 0 0 8px rgba(251,191,36,0.6);
+    }
+    .combo-gauge-bar {
+      width: 100%;
+      height: 12px;
+      background: rgba(30,30,30,0.8);
+      border-radius: 6px;
+      border: 1px solid rgba(251,191,36,0.3);
+      overflow: hidden;
+    }
+    .combo-gauge-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 6px;
+      transition: width 0.3s ease, background 0.3s ease;
+      background: linear-gradient(90deg, #22d3ee, #a855f7);
+    }
+    .combo-gauge-fill.hot {
+      background: linear-gradient(90deg, #fbbf24, #ef4444);
+      box-shadow: 0 0 12px rgba(251,191,36,0.6);
+    }
+    .combo-gauge-fill.fever {
+      background: linear-gradient(90deg, #ef4444, #ec4899, #a855f7);
+      box-shadow: 0 0 20px rgba(239,68,68,0.8);
+      animation: feverPulse 0.3s infinite alternate;
+    }
+    @keyframes feverPulse {
+      from { filter: brightness(1); }
+      to { filter: brightness(1.4); }
+    }
+
+    /* 콤보 배율 표시 */
+    .combo-multiplier {
+      position: absolute;
+      bottom: 100px;
+      right: 30px;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #fbbf24;
+      text-shadow: 0 0 20px rgba(251,191,36,0.8), 0 0 40px rgba(251,191,36,0.4);
+      z-index: 1001;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: scale(0.5);
+    }
+    .combo-multiplier.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .combo-multiplier.mega {
+      color: #ef4444;
+      text-shadow: 0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(239,68,68,0.4);
+      animation: megaCombo 0.5s ease infinite alternate;
+    }
+    @keyframes megaCombo {
+      from { transform: scale(1) rotate(-3deg); }
+      to { transform: scale(1.15) rotate(3deg); }
+    }
+
+    /* 피버 모드 오버레이 */
+    .fever-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .fever-overlay.active {
+      opacity: 1;
+      border: 4px solid;
+      border-image: linear-gradient(45deg, #ef4444, #fbbf24, #22c55e, #3b82f6, #a855f7) 1;
+      animation: feverBorder 1s linear infinite;
+    }
+    @keyframes feverBorder {
+      0% { border-image: linear-gradient(0deg, #ef4444, #fbbf24, #22c55e, #3b82f6, #a855f7) 1; }
+      25% { border-image: linear-gradient(90deg, #ef4444, #fbbf24, #22c55e, #3b82f6, #a855f7) 1; }
+      50% { border-image: linear-gradient(180deg, #ef4444, #fbbf24, #22c55e, #3b82f6, #a855f7) 1; }
+      75% { border-image: linear-gradient(270deg, #ef4444, #fbbf24, #22c55e, #3b82f6, #a855f7) 1; }
+      100% { border-image: linear-gradient(360deg, #ef4444, #fbbf24, #22c55e, #3b82f6, #a855f7) 1; }
+    }
+
+    /* 피버 모드 텍스트 */
+    .fever-text {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      font-size: 4rem;
+      font-weight: 900;
+      color: #fbbf24;
+      text-shadow: 0 0 30px rgba(251,191,36,1), 0 0 60px rgba(251,191,36,0.5), 0 4px 0 #b45309;
+      z-index: 9999;
+      pointer-events: none;
+      white-space: nowrap;
+      animation: feverTextPop 1.2s ease forwards;
+    }
+    @keyframes feverTextPop {
+      0% { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
+      20% { transform: translate(-50%, -50%) scale(1.3) rotate(5deg); opacity: 1; }
+      40% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+      80% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(2) rotate(0deg); opacity: 0; }
+    }
+
+    /* 골든 보너스 쿠폰 표시기 */
+    .golden-indicator {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1001;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #1a0a2e;
+      padding: 6px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      box-shadow: 0 0 20px rgba(251,191,36,0.5);
+    }
+    .golden-indicator.visible { opacity: 1; }
+
+    /* 게임 결과 모달 */
+    .game-result-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(10px);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.5s ease;
+    }
+    .game-result-card {
+      background: linear-gradient(135deg, #1a0a2e, #0f172a);
+      border: 2px solid rgba(34,211,238,0.3);
+      border-radius: 24px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 360px;
+      text-align: center;
+      animation: slideUp 0.5s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .game-result-grade {
+      font-size: 6rem;
+      font-weight: 900;
+      line-height: 1;
+      margin: 0.5rem 0;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .grade-S { background: linear-gradient(135deg, #fbbf24, #ef4444, #ec4899); -webkit-background-clip: text; animation: gradeGlow 1s infinite alternate; }
+    .grade-A { background: linear-gradient(135deg, #fbbf24, #f97316); -webkit-background-clip: text; }
+    .grade-B { background: linear-gradient(135deg, #a855f7, #6366f1); -webkit-background-clip: text; }
+    .grade-C { background: linear-gradient(135deg, #22d3ee, #3b82f6); -webkit-background-clip: text; }
+    .grade-D { background: linear-gradient(135deg, #9ca3af, #6b7280); -webkit-background-clip: text; }
+    @keyframes gradeGlow {
+      from { filter: brightness(1) drop-shadow(0 0 10px rgba(251,191,36,0.5)); }
+      to { filter: brightness(1.3) drop-shadow(0 0 30px rgba(251,191,36,0.8)); }
+    }
+    .game-result-score {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #22d3ee;
+      text-shadow: 0 0 15px rgba(34,211,238,0.5);
+    }
+    .game-result-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin: 1rem 0;
+    }
+    .result-stat {
+      background: rgba(34,211,238,0.1);
+      border-radius: 12px;
+      padding: 0.6rem;
+    }
+    .result-stat-label { font-size: 0.75rem; color: #94a3b8; }
+    .result-stat-value { font-size: 1.2rem; font-weight: bold; color: #e2e8f0; }
+    .game-result-rarity-bar {
+      display: flex;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 0.8rem 0;
+    }
+    .rarity-segment { transition: width 0.5s ease; }
+
+    @keyframes screenFlash {
+      from { opacity: 1; } to { opacity: 0; }
+    }
+    @keyframes catchPopup {
+      0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+      20% { transform: translate(-50%, -20px) scale(1.2); opacity: 1; }
+      40% { transform: translate(-50%, -30px) scale(1); opacity: 1; }
+      100% { transform: translate(-50%, -80px) scale(0.8); opacity: 0; }
+    }
+
     .coupon-card {
       background: rgba(26, 10, 46, 0.5);
       border-left: 4px solid;
@@ -3279,7 +3504,24 @@
         <span class="hud-label">획득</span>
         <span class="hud-value" id="caught">0</span>
       </div>
+      <div class="hud-item" id="hud-combo-item" style="display:none;">
+        <span class="hud-label">콤보</span>
+        <span class="hud-value" id="combo-display" style="color:#fbbf24;">0x</span>
+      </div>
     </div>
+    <!-- 골든 보너스 쿠폰 표시기 -->
+    <div class="golden-indicator" id="golden-indicator">⭐ 골든 보너스 쿠폰 등장! ⭐</div>
+    <!-- 콤보 게이지 -->
+    <div class="combo-gauge-container" id="combo-gauge">
+      <div class="combo-gauge-label" id="combo-gauge-label">COMBO 0x</div>
+      <div class="combo-gauge-bar">
+        <div class="combo-gauge-fill" id="combo-gauge-fill"></div>
+      </div>
+    </div>
+    <!-- 콤보 배율 -->
+    <div class="combo-multiplier" id="combo-multiplier">x1</div>
+    <!-- 피버 오버레이 -->
+    <div class="fever-overlay" id="fever-overlay"></div>
     <canvas id="game-canvas" width="921" height="803" style="width: 983px; height: 857px;"></canvas>
     <button onclick="endGame()" class="btn-primary" style="position: absolute; top: 20px; right: 20px; z-index: 1002;">❌ 종료</button>
   </div>
@@ -6482,7 +6724,13 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
       caughtCount = 0;
       caughtCoupons = [];
       gameRunning = true;
-      
+      comboCount = 0;
+      maxCombo = 0;
+      goldenCouponsSpawned = 0;
+      feverMode = false;
+      gameStartRealTime = Date.now();
+      rarityCounts = { common: 0, rare: 0, epic: 0, legendary: 0, mythic: 0 };
+
       updateHUD();
       initGame();
       
@@ -6500,6 +6748,317 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
     let audioCtx = null;
     let comboCount = 0;
     let lastCatchTime = 0;
+
+    // ═══ 🌟 Stage 1 보강 변수 ═══
+    let starField = null;
+    let dynamicLight1 = null, dynamicLight2 = null;
+    let feverMode = false;
+    let feverTimer = null;
+    let maxCombo = 0;
+    let goldenBonusInterval = null;
+    let goldenCouponsSpawned = 0;
+    let gameStartRealTime = 0;
+    let comboGaugeTimer = null;
+    let rarityCounts = { common: 0, rare: 0, epic: 0, legendary: 0, mythic: 0 };
+
+    // ═══ 🌌 우주 배경 별 파티클 ═══
+    function createStarField() {
+      const starsGeo = new THREE.BufferGeometry();
+      const starCount = 250;
+      const positions = new Float32Array(starCount * 3);
+      const sizes = new Float32Array(starCount);
+
+      for (let i = 0; i < starCount; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * 120;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 80;
+        positions[i * 3 + 2] = -20 - Math.random() * 40;
+        sizes[i] = Math.random() * 2 + 0.5;
+      }
+
+      starsGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      starsGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+      const starsMat = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.3,
+        transparent: true,
+        opacity: 0.8,
+        sizeAttenuation: true
+      });
+
+      starField = new THREE.Points(starsGeo, starsMat);
+      gameScene.add(starField);
+    }
+
+    // ═══ 💡 다이나믹 컬러 라이팅 ═══
+    function createDynamicLights() {
+      dynamicLight1 = new THREE.PointLight(0xff0080, 0.8, 60);
+      dynamicLight1.position.set(-15, 10, 5);
+      gameScene.add(dynamicLight1);
+
+      dynamicLight2 = new THREE.PointLight(0x00ffff, 0.8, 60);
+      dynamicLight2.position.set(15, -10, 5);
+      gameScene.add(dynamicLight2);
+    }
+
+    function updateDynamicLighting(time) {
+      if (dynamicLight1 && dynamicLight2) {
+        const hue1 = (time * 0.0003) % 1;
+        const hue2 = (time * 0.0003 + 0.5) % 1;
+        dynamicLight1.color.setHSL(hue1, 1, 0.5);
+        dynamicLight2.color.setHSL(hue2, 1, 0.5);
+        dynamicLight1.position.x = Math.sin(time * 0.001) * 20;
+        dynamicLight1.position.y = Math.cos(time * 0.0008) * 15;
+        dynamicLight2.position.x = Math.cos(time * 0.001) * 20;
+        dynamicLight2.position.y = Math.sin(time * 0.0008) * 15;
+
+        // 피버 모드일 때 라이트 강도 증가
+        if (feverMode) {
+          dynamicLight1.intensity = 1.5 + Math.sin(time * 0.01) * 0.5;
+          dynamicLight2.intensity = 1.5 + Math.cos(time * 0.01) * 0.5;
+        } else {
+          dynamicLight1.intensity = 0.8;
+          dynamicLight2.intensity = 0.8;
+        }
+      }
+    }
+
+    // ═══ 🌌 우주 배경 회전 ═══
+    function updateStarField(time) {
+      if (starField) {
+        starField.rotation.z = time * 0.00005;
+        starField.rotation.x = Math.sin(time * 0.00003) * 0.1;
+        // 별 반짝임 효과
+        starField.material.opacity = 0.6 + Math.sin(time * 0.002) * 0.2;
+      }
+    }
+
+    // ═══ 📊 콤보 게이지 UI ═══
+    function updateComboGauge() {
+      const gauge = document.getElementById('combo-gauge');
+      const fill = document.getElementById('combo-gauge-fill');
+      const label = document.getElementById('combo-gauge-label');
+      const multiplierEl = document.getElementById('combo-multiplier');
+      const comboHud = document.getElementById('hud-combo-item');
+      const comboDisplay = document.getElementById('combo-display');
+
+      if (comboCount >= 2) {
+        gauge?.classList.add('visible');
+        if (comboHud) { comboHud.style.display = ''; }
+        if (comboDisplay) { comboDisplay.textContent = comboCount + 'x'; }
+
+        const percent = Math.min((comboCount / 10) * 100, 100);
+        if (fill) {
+          fill.style.width = percent + '%';
+          fill.className = 'combo-gauge-fill' + (comboCount >= 10 ? ' fever' : comboCount >= 7 ? ' hot' : '');
+        }
+        if (label) { label.textContent = `COMBO ${comboCount}x (${getComboMultiplier()}배율)`; }
+
+        // 콤보 배율 표시
+        if (multiplierEl) {
+          multiplierEl.textContent = `x${getComboMultiplier()}`;
+          multiplierEl.classList.add('visible');
+          multiplierEl.classList.toggle('mega', comboCount >= 7);
+        }
+      } else {
+        gauge?.classList.remove('visible');
+        multiplierEl?.classList.remove('visible');
+        if (comboHud) { comboHud.style.display = 'none'; }
+      }
+
+      // 콤보 유지 타이머 — 1.5초 후 리셋
+      clearTimeout(comboGaugeTimer);
+      comboGaugeTimer = setTimeout(() => {
+        if (gameRunning) {
+          comboCount = 0;
+          gauge?.classList.remove('visible');
+          multiplierEl?.classList.remove('visible');
+          if (fill) fill.style.width = '0%';
+          if (comboHud) { comboHud.style.display = 'none'; }
+        }
+      }, 2000);
+    }
+
+    function getComboMultiplier() {
+      if (comboCount >= 10) return 3.0;
+      if (comboCount >= 7) return 2.0;
+      if (comboCount >= 5) return 1.5;
+      if (comboCount >= 3) return 1.2;
+      return 1.0;
+    }
+
+    // ═══ 🔥 피버 모드 ═══
+    function activateFeverMode() {
+      if (feverMode) return;
+      feverMode = true;
+
+      // 피버 오버레이
+      document.getElementById('fever-overlay')?.classList.add('active');
+
+      // 피버 텍스트 팡!
+      const feverText = document.createElement('div');
+      feverText.className = 'fever-text';
+      feverText.textContent = '🔥 FEVER TIME!! 🔥';
+      document.body.appendChild(feverText);
+      setTimeout(() => feverText.remove(), 1200);
+
+      // 피버 사운드 (tada 사용)
+      playGameSound('legendary');
+
+      // 진동
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+
+      // 토스트
+      if (typeof showToast === 'function') {
+        showToast('🔥 FEVER TIME! 3초간 모든 쿠폰이 에픽 이상!!', 'game');
+      }
+
+      // 3초 후 종료
+      clearTimeout(feverTimer);
+      feverTimer = setTimeout(() => {
+        feverMode = false;
+        document.getElementById('fever-overlay')?.classList.remove('active');
+      }, 3000);
+    }
+
+    function getFeverRarity() {
+      // 피버 모드 중에는 epic+ 만 나옴
+      const rand = Math.random();
+      if (rand < 0.1) return 'mythic';
+      if (rand < 0.35) return 'legendary';
+      return 'epic';
+    }
+
+    // ═══ ⭐ 골든 보너스 쿠폰 ═══
+    function spawnGoldenBonus() {
+      if (!gameRunning || !gameScene) return;
+
+      goldenCouponsSpawned++;
+
+      // 큰 황금 쿠폰 생성
+      const shape = new THREE.Shape();
+      const w = 4.5, h = 3, r = 0.5;
+      shape.moveTo(-w/2 + r, -h/2);
+      shape.lineTo(w/2 - r, -h/2);
+      shape.quadraticCurveTo(w/2, -h/2, w/2, -h/2 + r);
+      shape.lineTo(w/2, h/2 - r);
+      shape.quadraticCurveTo(w/2, h/2, w/2 - r, h/2);
+      shape.lineTo(-w/2 + r, h/2);
+      shape.quadraticCurveTo(-w/2, h/2, -w/2, h/2 - r);
+      shape.lineTo(-w/2, -h/2 + r);
+      shape.quadraticCurveTo(-w/2, -h/2, -w/2 + r, -h/2);
+
+      const geometry = new THREE.ExtrudeGeometry(shape, { depth: 0.5, bevelEnabled: true, bevelThickness: 0.15, bevelSize: 0.15, bevelSegments: 5 });
+      const material = new THREE.MeshStandardMaterial({
+        color: 0xfbbf24,
+        emissive: 0xfbbf24,
+        emissiveIntensity: 0.8,
+        metalness: 0.9,
+        roughness: 0.1
+      });
+
+      const golden = new THREE.Mesh(geometry, material);
+      golden.position.set((Math.random() - 0.5) * 30, 25, (Math.random() - 0.5) * 10);
+      golden.userData = {
+        active: true,
+        rarity: 'legendary',
+        fallSpeed: 0.02 + Math.random() * 0.02,
+        isGolden: true,
+        spawnTime: Date.now()
+      };
+
+      gameScene.add(golden);
+      coupons.push(golden);
+
+      // 골든 표시기
+      const indicator = document.getElementById('golden-indicator');
+      indicator?.classList.add('visible');
+      setTimeout(() => indicator?.classList.remove('visible'), 3000);
+
+      // 8초 후 사라짐
+      setTimeout(() => {
+        if (golden.userData.active) {
+          golden.userData.active = false;
+          golden.visible = false;
+        }
+      }, 8000);
+    }
+
+    // ═══ 🏆 게임 결과 등급 시스템 ═══
+    function getGameGrade(totalScore) {
+      if (totalScore >= 10000) return { grade: 'S', title: '전설의 쿠폰 헌터', color: 'grade-S', emoji: '👑' };
+      if (totalScore >= 5000) return { grade: 'A', title: '마스터 쿠폰 헌터', color: 'grade-A', emoji: '🌟' };
+      if (totalScore >= 2000) return { grade: 'B', title: '숙련된 쿠폰 헌터', color: 'grade-B', emoji: '💜' };
+      if (totalScore >= 800) return { grade: 'C', title: '성장하는 쿠폰 헌터', color: 'grade-C', emoji: '💎' };
+      return { grade: 'D', title: '쿠폰 헌터 입문', color: 'grade-D', emoji: '🎮' };
+    }
+
+    function showGameResult(totalScore, caughtTotal, newCouponsAdded, duplicatesUpdated) {
+      const gradeInfo = getGameGrade(totalScore);
+      const elapsed = Math.floor((Date.now() - gameStartRealTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+
+      // 희귀도별 비율 계산
+      const totalRarity = Object.values(rarityCounts).reduce((a, b) => a + b, 0) || 1;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'game-result-overlay';
+      overlay.id = 'game-result-overlay';
+      overlay.innerHTML = `
+        <div class="game-result-card">
+          <div style="font-size:1.2rem; color:#94a3b8; margin-bottom:0.3rem;">🎉 게임 종료!</div>
+          <div class="game-result-grade ${gradeInfo.color}">${gradeInfo.emoji} ${gradeInfo.grade}</div>
+          <div style="color:#e2e8f0; font-size:0.9rem; margin-bottom:0.5rem;">${gradeInfo.title}</div>
+          <div class="game-result-score">${totalScore.toLocaleString()}P</div>
+
+          <div class="game-result-stats">
+            <div class="result-stat">
+              <div class="result-stat-label">획득 쿠폰</div>
+              <div class="result-stat-value">${caughtTotal}장</div>
+            </div>
+            <div class="result-stat">
+              <div class="result-stat-label">최대 콤보</div>
+              <div class="result-stat-value">${maxCombo}x</div>
+            </div>
+            <div class="result-stat">
+              <div class="result-stat-label">플레이 시간</div>
+              <div class="result-stat-value">${minutes}분 ${seconds}초</div>
+            </div>
+            <div class="result-stat">
+              <div class="result-stat-label">새 쿠폰</div>
+              <div class="result-stat-value">${newCouponsAdded}장</div>
+            </div>
+          </div>
+
+          <!-- 희귀도 바 -->
+          <div style="font-size:0.75rem; color:#94a3b8; text-align:left; margin-bottom:4px;">획득 쿠폰 희귀도</div>
+          <div class="game-result-rarity-bar">
+            <div class="rarity-segment" style="width:${(rarityCounts.common/totalRarity*100)}%; background:#9ca3af;"></div>
+            <div class="rarity-segment" style="width:${(rarityCounts.rare/totalRarity*100)}%; background:#3b82f6;"></div>
+            <div class="rarity-segment" style="width:${(rarityCounts.epic/totalRarity*100)}%; background:#a855f7;"></div>
+            <div class="rarity-segment" style="width:${(rarityCounts.legendary/totalRarity*100)}%; background:#fbbf24;"></div>
+            <div class="rarity-segment" style="width:${(rarityCounts.mythic/totalRarity*100)}%; background:#ef4444;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.65rem; color:#94a3b8; margin-bottom:1rem;">
+            <span>일반 ${rarityCounts.common}</span>
+            <span style="color:#3b82f6;">레어 ${rarityCounts.rare}</span>
+            <span style="color:#a855f7;">에픽 ${rarityCounts.epic}</span>
+            <span style="color:#fbbf24;">전설 ${rarityCounts.legendary}</span>
+            <span style="color:#ef4444;">신화 ${rarityCounts.mythic}</span>
+          </div>
+
+          ${duplicatesUpdated > 0 ? `<div style="font-size:0.8rem; color:#94a3b8; margin-bottom:0.5rem;">🔄 기존 쿠폰 ${duplicatesUpdated}장 갱신 (중복 방지)</div>` : ''}
+
+          <button onclick="document.getElementById('game-result-overlay').remove();"
+                  class="btn-primary" style="width:100%; padding:0.8rem; font-size:1rem; border-radius:12px;">
+            👛 쿠폰 지갑으로 확인하기
+          </button>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+    }
 
     function initGameAudio() {
       if (audioCtx) return;
@@ -6648,27 +7207,44 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
       initGameAudio();
 
       gameScene = new THREE.Scene();
-      gameScene.background = new THREE.Color(0x0a0a0a);
-      
+      gameScene.background = new THREE.Color(0x050510); // 🌌 깊은 우주색
+
+      // 안개 효과로 깊이감
+      gameScene.fog = new THREE.FogExp2(0x050510, 0.008);
+
       gameCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       gameCamera.position.z = 30;
-      
+
       gameRenderer = new THREE.WebGLRenderer({ canvas, antialias: true });
       gameRenderer.setSize(window.innerWidth, window.innerHeight);
       gameRenderer.setPixelRatio(window.devicePixelRatio);
-      
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      gameRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+      gameRenderer.toneMappingExposure = 1.2;
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
       gameScene.add(ambientLight);
-      
-      const pointLight = new THREE.PointLight(0x22d3ee, 1, 100);
+
+      const pointLight = new THREE.PointLight(0x22d3ee, 1.2, 100);
       pointLight.position.set(10, 10, 10);
       gameScene.add(pointLight);
-      
+
+      // 🌌 우주 배경 별 생성
+      createStarField();
+
+      // 💡 다이나믹 컬러 라이팅
+      createDynamicLights();
+
       createCoupons();
-      
+
+      // ⭐ 10초마다 골든 보너스 쿠폰
+      clearInterval(goldenBonusInterval);
+      goldenBonusInterval = setInterval(() => {
+        if (gameRunning) spawnGoldenBonus();
+      }, 12000); // 첫 12초 후부터
+
       canvas.addEventListener('click', onCanvasClick);
       canvas.addEventListener('touchstart', onCanvasClick);
-      
+
       animateGame();
     }
     
@@ -6806,23 +7382,50 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
     
     function animateGame() {
       if (!gameRunning) return;
-      
+
       animationId = requestAnimationFrame(animateGame);
-      
+
+      const time = Date.now();
+
       coupons.forEach((coupon) => {
         if (coupon.userData.active) {
           coupon.position.y -= coupon.userData.fallSpeed;
           coupon.rotation.x += 0.01;
           coupon.rotation.y += 0.02;
-          
+
+          // ⭐ 골든 쿠폰 특수 효과
+          if (coupon.userData.isGolden) {
+            coupon.rotation.y += 0.03; // 더 빠른 회전
+            const pulse = 0.5 + Math.sin(time * 0.005) * 0.3;
+            coupon.material.emissiveIntensity = pulse;
+            coupon.scale.setScalar(1 + Math.sin(time * 0.003) * 0.1);
+          }
+
+          // 🔥 피버 모드: 쿠폰 재스폰 시 희귀도 오버라이드
           if (coupon.position.y < -20) {
             coupon.position.y = 20;
             coupon.position.x = (Math.random() - 0.5) * 40;
             coupon.position.z = (Math.random() - 0.5) * 20;
+
+            if (feverMode && !coupon.userData.isGolden) {
+              const newRarity = getFeverRarity();
+              coupon.userData.rarity = newRarity;
+              const rarityColor = rarities[newRarity]?.color || 0xffffff;
+              coupon.material.color.setHex(rarityColor);
+              coupon.material.emissive.setHex(rarityColor);
+              coupon.material.emissiveIntensity = 0.4;
+            }
+
+            coupon.userData.active = true;
+            coupon.visible = true;
           }
         }
       });
-      
+
+      // 🌌 우주 배경 + 다이나믹 라이팅 업데이트
+      updateStarField(time);
+      updateDynamicLighting(time);
+
       // ✨ 파티클 폭발 업데이트
       updateExplosionParticles();
 
@@ -6861,10 +7464,7 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
       coupon.visible = false;
 
       const rarity = coupon.userData.rarity;
-      const points = rarities[rarity].score;
-
-      score += points;
-      caughtCount++;
+      const basePoints = rarities[rarity].score;
 
       // 🔊 콤보 시스템
       const now = Date.now();
@@ -6874,6 +7474,24 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
         comboCount = 1;
       }
       lastCatchTime = now;
+      if (comboCount > maxCombo) maxCombo = comboCount;
+
+      // 📊 콤보 배율 점수!
+      const multiplier = getComboMultiplier();
+      const points = Math.round(basePoints * multiplier);
+      score += points;
+      caughtCount++;
+
+      // 📊 희귀도 카운트
+      rarityCounts[rarity] = (rarityCounts[rarity] || 0) + 1;
+
+      // 📊 콤보 게이지 UI 업데이트
+      updateComboGauge();
+
+      // 🔥 10콤보 → 피버 모드 발동!
+      if (comboCount >= 10 && !feverMode) {
+        activateFeverMode();
+      }
 
       // ✨ 파티클 폭발!
       createCatchExplosion(coupon.position.clone(), rarity);
@@ -6892,13 +7510,14 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
         playGameSound('catch'); // tok.mp3
       }
 
-      // 💬 획득 텍스트 팝업
+      // 💬 획득 텍스트 팝업 (배율 표시 포함)
+      const multiplierText = multiplier > 1 ? ` (x${multiplier})` : '';
       const popupTexts = {
-        common: `+${points}P`,
-        rare: `✨ +${points}P`,
-        epic: `🔥 EPIC! +${points}P`,
-        legendary: `👑 LEGENDARY!! +${points}P`,
-        mythic: `💎 MYTHIC!!! +${points}P`
+        common: `+${points}P${multiplierText}`,
+        rare: `✨ +${points}P${multiplierText}`,
+        epic: `🔥 EPIC! +${points}P${multiplierText}`,
+        legendary: `👑 LEGENDARY!! +${points}P${multiplierText}`,
+        mythic: `💎 MYTHIC!!! +${points}P${multiplierText}`
       };
       const rect = document.getElementById('game-canvas')?.getBoundingClientRect();
       if (rect) {
@@ -6956,10 +7575,14 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
     function endGame() {
       gameRunning = false;
       clearInterval(timerInterval);
+      clearInterval(goldenBonusInterval);
+      clearTimeout(feverTimer);
+      clearTimeout(comboGaugeTimer);
 
       // 🔊 게임 종료 사운드
       playGameSound('congrats');
       comboCount = 0;
+      feverMode = false;
 
       if (animationId) {
         cancelAnimationFrame(animationId);
@@ -6969,26 +7592,32 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
       explosionParticles.forEach(p => { gameScene.remove(p); p.geometry.dispose(); p.material.dispose(); });
       explosionParticles.length = 0;
 
+      // UI 정리
+      document.getElementById('fever-overlay')?.classList.remove('active');
+      document.getElementById('combo-gauge')?.classList.remove('visible');
+      document.getElementById('combo-multiplier')?.classList.remove('visible');
+      document.getElementById('golden-indicator')?.classList.remove('visible');
+
       document.getElementById('game-container').classList.remove('active');
-      
+
       // 🎯 중복 방지: 매장ID + 할인타입 + 할인값 기준
       let newCouponsAdded = 0;
       let duplicatesUpdated = 0;
-      
+
       caughtCoupons.forEach((c, i) => {
         const storeId = c.store_id || 'game';
         const discountType = c.discount_type || 'percentage';
         const discountValue = c.discount_value || (c.score / 100);
-        
+
         // 중복 키 생성: store_id|discount_type|discount_value
         const uniqueKey = `${storeId}|${discountType}|${discountValue}`;
-        
+
         // 기존 쿠폰 중 같은 키가 있는지 확인
         const existingIndex = allCoupons.findIndex(coupon => {
           const existingKey = `${coupon.store_id || 'game'}|${coupon.discount_type || 'percentage'}|${coupon.discount_value}`;
           return existingKey === uniqueKey && !coupon.is_used;
         });
-        
+
         if (existingIndex !== -1) {
           // 🔄 중복: 날짜/시간만 업데이트
           allCoupons[existingIndex].acquired_at = new Date().toISOString();
@@ -7031,15 +7660,10 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
           newCouponsAdded++;
         }
       });
-      
-      // 결과 알림
-      let resultMsg = `🎉 게임 종료!\n\n최종 점수: ${score.toLocaleString()}점\n획득 쿠폰: ${caughtCount}개`;
-      if (newCouponsAdded > 0) resultMsg += `\n\n✅ 새 쿠폰 ${newCouponsAdded}장 추가!`;
-      if (duplicatesUpdated > 0) resultMsg += `\n🔄 기존 쿠폰 ${duplicatesUpdated}장 갱신 (중복 방지)`;
-      resultMsg += `\n\n쿠폰 지갑에서 확인하세요!`;
-      
-      alert(resultMsg);
-      
+
+      // 🏆 등급 결과 화면! (alert 대신)
+      showGameResult(score, caughtCount, newCouponsAdded, duplicatesUpdated);
+
       // localStorage 저장
       localStorage.setItem('allCoupons', JSON.stringify(allCoupons));
     }
