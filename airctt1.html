@@ -7296,18 +7296,24 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
         
         coupon.userData = {
           rarity: issuedCoupon.rarity,
-          fallSpeed: 0.03 + Math.random() * 0.03,
+          fallSpeed: 0.02 + Math.random() * 0.025,
           active: true,
           issuedCoupon: issuedCoupon,
-          isRealCoupon: true // 실제 매장 쿠폰 표시
+          isRealCoupon: true,
+          // 🌊 흔들거림 파라미터
+          wobbleSpeed: 0.5 + Math.random() * 1.5,
+          wobbleAmount: 0.3 + Math.random() * 0.5,
+          wobbleOffset: Math.random() * Math.PI * 2,
+          spinSpeed: 0.005 + Math.random() * 0.015,
+          floatPhase: Math.random() * Math.PI * 2
         };
         
         gameScene.add(coupon);
         coupons.push(coupon);
       });
       
-      // 나머지는 기본 쿠폰으로 채우기 (최소 10개 유지)
-      const minCoupons = 10;
+      // 나머지는 기본 쿠폰으로 채우기 (최소 25개 — 화면 가득 비처럼!)
+      const minCoupons = 25;
       for (let i = coupons.length; i < minCoupons; i++) {
         const rand = Math.random();
         let rarity, randomCoupon;
@@ -7369,10 +7375,16 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
         
         coupon.userData = {
           rarity: rarity,
-          fallSpeed: 0.03 + Math.random() * 0.03,
+          fallSpeed: 0.02 + Math.random() * 0.025,
           active: true,
           issuedCoupon: randomCoupon,
-          isRealCoupon: true
+          isRealCoupon: true,
+          // 🌊 흔들거림 파라미터
+          wobbleSpeed: 0.5 + Math.random() * 1.5,
+          wobbleAmount: 0.3 + Math.random() * 0.5,
+          wobbleOffset: Math.random() * Math.PI * 2,
+          spinSpeed: 0.005 + Math.random() * 0.015,
+          floatPhase: Math.random() * Math.PI * 2
         };
         
         gameScene.add(coupon);
@@ -7387,36 +7399,51 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
 
       const time = Date.now();
 
+      const elapsed = time * 0.001; // 초 단위
+
       coupons.forEach((coupon) => {
         if (coupon.userData.active) {
-          coupon.position.y -= coupon.userData.fallSpeed;
-          coupon.rotation.x += 0.01;
-          coupon.rotation.y += 0.02;
+          const ud = coupon.userData;
+
+          // 🌊 나뭇잎처럼 흔들거리며 떨어지기!
+          coupon.position.y -= ud.fallSpeed;
+
+          // 좌우 웨이브 (사인파 — 나뭇잎이 바람에 날리듯)
+          coupon.position.x += Math.sin(elapsed * ud.wobbleSpeed + ud.wobbleOffset) * ud.wobbleAmount * 0.03;
+
+          // Z축 미세 흔들림 (깊이감)
+          coupon.position.z += Math.cos(elapsed * ud.wobbleSpeed * 0.7 + ud.floatPhase) * 0.01;
+
+          // 회전: 뒤집히며 떨어지는 느낌
+          coupon.rotation.x += ud.spinSpeed;
+          coupon.rotation.y += ud.spinSpeed * 1.5;
+          coupon.rotation.z = Math.sin(elapsed * ud.wobbleSpeed + ud.wobbleOffset) * 0.15; // 좌우 기울임
 
           // ⭐ 골든 쿠폰 특수 효과
-          if (coupon.userData.isGolden) {
-            coupon.rotation.y += 0.03; // 더 빠른 회전
+          if (ud.isGolden) {
+            coupon.rotation.y += 0.03;
             const pulse = 0.5 + Math.sin(time * 0.005) * 0.3;
             coupon.material.emissiveIntensity = pulse;
             coupon.scale.setScalar(1 + Math.sin(time * 0.003) * 0.1);
           }
 
-          // 🔥 피버 모드: 쿠폰 재스폰 시 희귀도 오버라이드
+          // 🔥 재스폰 (화면 아래로 빠지면 위에서 다시)
           if (coupon.position.y < -20) {
-            coupon.position.y = 20;
+            coupon.position.y = 22 + Math.random() * 8;
             coupon.position.x = (Math.random() - 0.5) * 40;
             coupon.position.z = (Math.random() - 0.5) * 20;
 
-            if (feverMode && !coupon.userData.isGolden) {
+            // 피버 모드: 희귀도 오버라이드
+            if (feverMode && !ud.isGolden) {
               const newRarity = getFeverRarity();
-              coupon.userData.rarity = newRarity;
+              ud.rarity = newRarity;
               const rarityColor = rarities[newRarity]?.color || 0xffffff;
               coupon.material.color.setHex(rarityColor);
               coupon.material.emissive.setHex(rarityColor);
               coupon.material.emissiveIntensity = 0.4;
             }
 
-            coupon.userData.active = true;
+            ud.active = true;
             coupon.visible = true;
           }
         }
