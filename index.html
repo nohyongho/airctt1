@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AIRCTT - AI Reality CouponTalkTalk</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--p:#6C63FF;--s:#FF6584;--bg:#0a0a14;--card:#151525;--card2:#1e1e35;--text:#e8e8f0;--success:#00E676;--warn:#FFAB00;--danger:#FF1744;--r:14px;--shadow:0 8px 32px rgba(0,0,0,.4)}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+a{color:var(--p);text-decoration:none}
+.hide{display:none!important}
+
+/* NAV */
+.topnav{position:fixed;top:0;left:0;right:0;height:60px;background:rgba(21,21,37,.95);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:1000;border-bottom:1px solid rgba(108,99,255,.2)}
+.topnav .logo{font-size:1.3em;font-weight:900;background:linear-gradient(135deg,var(--p),var(--s));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topnav .nav-links{display:flex;gap:6px}
+.topnav .nav-links button{background:none;border:1px solid rgba(255,255,255,.1);color:var(--text);padding:6px 14px;border-radius:20px;cursor:pointer;font-size:.82em;transition:all .3s}
+.topnav .nav-links button:hover,.topnav .nav-links button.active{background:var(--p);border-color:var(--p);color:#fff}
+.user-info{display:flex;align-items:center;gap:8px;font-size:.85em}
+.user-info .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--s));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8em}
+
+/* PAGE */
+.page{display:none;padding:80px 20px 100px;max-width:900px;margin:0 auto;animation:fadeIn .4s}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* CARDS */
+.card{background:var(--card);border-radius:var(--r);padding:24px;margin-bottom:16px;border:1px solid rgba(255,255,255,.05);transition:transform .2s}
+.card:hover{transform:translateY(-2px)}
+.card h3{font-size:1.1em;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card p{color:rgba(255,255,255,.6);font-size:.9em;line-height:1.6}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:var(--r);border:none;cursor:pointer;font-size:.95em;font-weight:600;transition:all .3s}
+.btn-primary{background:linear-gradient(135deg,var(--p),#8B5CF6);color:#fff;box-shadow:0 4px 15px rgba(108,99,255,.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(108,99,255,.5)}
+.btn-success{background:linear-gradient(135deg,var(--success),#00C853);color:#000}
+.btn-danger{background:linear-gradient(135deg,var(--danger),#D50000);color:#fff}
+.btn-outline{background:transparent;border:2px solid var(--p);color:var(--p)}
+.btn-sm{padding:8px 16px;font-size:.82em}
+.btn-block{width:100%;justify-content:center}
+
+/* FORMS */
+.form-group{margin-bottom:16px}
+.form-group label{display:block;margin-bottom:6px;font-size:.85em;color:rgba(255,255,255,.7);font-weight:500}
+.form-control{width:100%;padding:12px 16px;background:var(--card2);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);color:var(--text);font-size:.95em;transition:border .3s}
+.form-control:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(108,99,255,.15)}
+select.form-control{appearance:none;cursor:pointer}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;font-size:.75em;font-weight:600}
+.badge-pending{background:rgba(255,171,0,.15);color:var(--warn)}
+.badge-approved{background:rgba(0,230,118,.15);color:var(--success)}
+.badge-rejected{background:rgba(255,23,68,.15);color:var(--danger)}
+
+/* MODAL */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:2000;animation:fadeIn .3s}
+.modal{background:var(--card);border-radius:var(--r);padding:32px;width:90%;max-width:500px;max-height:85vh;overflow-y:auto;border:1px solid rgba(108,99,255,.2);box-shadow:var(--shadow)}
+.modal h2{margin-bottom:20px;display:flex;align-items:center;gap:10px}
+
+/* STEPS */
+.steps{display:flex;justify-content:center;gap:8px;margin-bottom:24px}
+.step-dot{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .3s}
+.step-dot.active{background:var(--p);box-shadow:0 0 12px var(--p)}
+.step-dot.done{background:var(--success)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:var(--card2);border-radius:var(--r);padding:20px;text-align:center}
+.stat-card .num{font-size:2em;font-weight:900;background:linear-gradient(135deg,var(--p),var(--s));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-card .label{font-size:.78em;color:rgba(255,255,255,.5);margin-top:4px}
+
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px 16px;text-align:left;border-bottom:1px solid rgba(255,255,255,.05);font-size:.88em}
+th{color:rgba(255,255,255,.5);font-weight:500;font-size:.8em;text-transform:uppercase;letter-spacing:.5px}
+tr:hover td{background:rgba(108,99,255,.05)}
+
+/* MAP SIM */
+.map-sim{width:100%;height:250px;background:var(--card2);border-radius:var(--r);position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.1)}
+.map-sim .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:30px 30px}
+.map-sim .center-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:20px;height:20px;background:var(--s);border-radius:50%;z-index:2;box-shadow:0 0 20px var(--s)}
+.map-sim .radius-circle{position:absolute;top:50%;left:50%;border:2px solid var(--p);border-radius:50%;opacity:.4;transform:translate(-50%,-50%);z-index:1}
+
+/* GAME */
+.game-area{width:100%;height:400px;background:linear-gradient(180deg,#1a0a2e,#0a1628);border-radius:var(--r);position:relative;overflow:hidden;cursor:crosshair;touch-action:none}
+.game-area .coupon-obj{position:absolute;font-size:2em;cursor:pointer;animation:float 3s ease-in-out infinite;transition:transform .2s;filter:drop-shadow(0 0 8px rgba(108,99,255,.5))}
+.game-area .coupon-obj:hover{transform:scale(1.2)}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+.game-hud{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--card);border-radius:var(--r);margin-bottom:12px}
+.game-hud .score{font-size:1.2em;font-weight:700}
+.game-hud .timer{color:var(--s);font-weight:600}
+
+/* WALLET */
+.wallet-card{background:linear-gradient(135deg,var(--card2),rgba(108,99,255,.1));border-radius:var(--r);padding:20px;margin-bottom:12px;border:1px solid rgba(108,99,255,.15);display:flex;gap:16px;align-items:center;cursor:pointer;transition:all .3s}
+.wallet-card:hover{border-color:var(--p);box-shadow:0 4px 20px rgba(108,99,255,.15)}
+.wallet-card .coupon-icon{width:60px;height:60px;border-radius:12px;background:linear-gradient(135deg,var(--p),var(--s));display:flex;align-items:center;justify-content:center;font-size:1.5em;flex-shrink:0}
+.wallet-card .coupon-info{flex:1}
+.wallet-card .coupon-info h4{font-size:.95em;margin-bottom:4px}
+.wallet-card .coupon-info .discount{color:var(--s);font-weight:700;font-size:1.1em}
+.wallet-card .coupon-info .expiry{font-size:.78em;color:rgba(255,255,255,.4);margin-top:4px}
+
+/* PARTICLES */
+.particle{position:fixed;pointer-events:none;z-index:9999;animation:particleFade 1s forwards}
+@keyframes particleFade{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(0) translateY(-100px)}}
+
+/* TOAST */
+.toast{position:fixed;top:80px;right:20px;background:var(--card);border-left:4px solid var(--success);padding:16px 20px;border-radius:var(--r);z-index:3000;animation:slideIn .4s;box-shadow:var(--shadow);max-width:350px}
+.toast.error{border-left-color:var(--danger)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* BOTTOM NAV mobile */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(21,21,37,.98);backdrop-filter:blur(12px);padding:8px 0;z-index:1000;border-top:1px solid rgba(108,99,255,.2)}
+.bottom-nav .nav-items{display:flex;justify-content:space-around;align-items:center}
+.bottom-nav .nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.68em;color:rgba(255,255,255,.5);cursor:pointer;padding:4px 8px;transition:color .3s}
+.bottom-nav .nav-item.active{color:var(--p)}
+.bottom-nav .nav-item i{font-size:1.3em}
+
+/* FILE UPLOAD */
+.upload-area{border:2px dashed rgba(108,99,255,.3);border-radius:var(--r);padding:40px;text-align:center;cursor:pointer;transition:all .3s}
+.upload-area:hover{border-color:var(--p);background:rgba(108,99,255,.05)}
+.upload-area i{font-size:2em;color:var(--p);margin-bottom:8px}
+
+/* RANGE */
+input[type=range]{width:100%;accent-color:var(--p)}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+.topnav .nav-links{display:none}
+.bottom-nav{display:block}
+.page{padding:70px 12px 90px}
+}
+
+/* ANIMATIONS */
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes glow{0%,100%{box-shadow:0 0 5px var(--p)}50%{box-shadow:0 0 25px var(--p)}}
+.glow{animation:glow 2s infinite}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+<div class="logo"><i class="fas fa-cube"></i> AIRCTT</div>
+<div class="nav-links">
+  <button onclick="showPage('home')" class="active" data-page="home"><i class="fas fa-home"></i> 홈</button>
+  <button onclick="showPage('store')" data-page="store"><i class="fas fa-store"></i> 매장입점</button>
+  <button onclick="showPage('merchant')" data-page="merchant"><i class="fas fa-ticket-alt"></i> 쿠폰관리</button>
+  <button onclick="showPage('admin')" data-page="admin"><i class="fas fa-shield-alt"></i> 관리자</button>
+  <button onclick="showPage('game')" data-page="game"><i class="fas fa-gamepad"></i> AR게임</button>
+  <button onclick="showPage('wallet')" data-page="wallet"><i class="fas fa-wallet"></i> 지갑</button>
+</div>
+<div class="user-info">
+  <span id="currentUser">게스트</span>
+  <div class="avatar" id="userAvatar">G</div>
+</div>
+</nav>
+
+<!-- BOTTOM NAV (MOBILE) -->
+<div class="bottom-nav">
+<div class="nav-items">
+  <div class="nav-item active" onclick="showPage('home')"><i class="fas fa-home"></i><span>홈</span></div>
+  <div class="nav-item" onclick="showPage('store')"><i class="fas fa-store"></i><span>매장</span></div>
+  <div class="nav-item" onclick="showPage('merchant')"><i class="fas fa-ticket-alt"></i><span>쿠폰</span></div>
+  <div class="nav-item" onclick="showPage('game')"><i class="fas fa-gamepad"></i><span>게임</span></div>
+  <div class="nav-item" onclick="showPage('wallet')"><i class="fas fa-wallet"></i><span>지갑</span></div>
+</div>
+</div>
+
+<!-- ========== HOME PAGE ========== -->
+<div class="page active" id="page-home">
+<div style="text-align:center;padding:40px 0 30px">
+  <div style="font-size:3em;margin-bottom:12px">🎮🎟️🤖</div>
+  <h1 style="font-size:2em;font-weight:900;background:linear-gradient(135deg,var(--p),var(--s));-webkit-background-clip:text;-webkit-text-fill-color:transparent">AIRCTT</h1>
+  <p style="color:rgba(255,255,255,.6);margin-top:8px;font-size:1.05em">AI Reality CouponTalkTalk</p>
+  <p style="color:rgba(255,255,255,.4);margin-top:4px;font-size:.88em">AR 쿠폰 게임 플랫폼 - 다우데이타 × 벤 피지사 협력</p>
+</div>
+
+<div class="stats">
+  <div class="stat-card"><div class="num" id="statStores">0</div><div class="label">입점 매장</div></div>
+  <div class="stat-card"><div class="num" id="statCoupons">0</div><div class="label">발행 쿠폰</div></div>
+  <div class="stat-card"><div class="num" id="statGames">0</div><div class="label">게임 플레이</div></div>
+  <div class="stat-card"><div class="num" id="statUsers">1</div><div class="label">사용자</div></div>
+</div>
+
+<div style="margin-bottom:16px">
+  <h3 style="margin-bottom:12px"><i class="fas fa-bolt" style="color:var(--warn)"></i> 빠른 시작</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card" onclick="showPage('store')" style="cursor:pointer;text-align:center">
+      <i class="fas fa-store" style="font-size:2em;color:var(--p);margin-bottom:8px"></i>
+      <h3 style="justify-content:center">매장 입점</h3>
+      <p>매장을 등록하고 쿠폰을 발행하세요</p>
+    </div>
+    <div class="card" onclick="showPage('game')" style="cursor:pointer;text-align:center">
+      <i class="fas fa-gamepad" style="font-size:2em;color:var(--s);margin-bottom:8px"></i>
+      <h3 style="justify-content:center">AR 게임</h3>
+      <p>게임으로 쿠폰을 획득하세요</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3><i class="fas fa-info-circle" style="color:var(--p)"></i> 플로우 안내</h3>
+  <p>1️⃣ 매장 입점 신청 → 2️⃣ 관리자 승인 → 3️⃣ 쿠폰 발행 (3단계) → 4️⃣ 결제 확인 → 5️⃣ 관리자 최종 승인 → 6️⃣ AR 게임 배포 → 7️⃣ 유저 쿠폰 획득 → 8️⃣ 쿠폰 사용(결제)</p>
+</div>
+
+<div class="card">
+  <h3><i class="fas fa-user-shield" style="color:var(--success)"></i> 로그인 시뮬레이션</h3>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+    <button class="btn btn-primary btn-sm" onclick="loginAs('admin')"><i class="fas fa-crown"></i> 최종관리자</button>
+    <button class="btn btn-outline btn-sm" onclick="loginAs('merchant')"><i class="fas fa-store"></i> 매장 사장님</button>
+    <button class="btn btn-outline btn-sm" onclick="loginAs('user')"><i class="fas fa-user"></i> 일반 유저</button>
+  </div>
+</div>
+</div>
+
+<!-- ========== STORE PAGE (매장입점) ========== -->
+<div class="page" id="page-store">
+<h2 style="margin-bottom:20px"><i class="fas fa-store" style="color:var(--p)"></i> 매장 입점</h2>
+
+<div class="card" id="storeApplyCard">
+  <h3><i class="fas fa-plus-circle" style="color:var(--success)"></i> 매장 입점 신청</h3>
+  <p style="margin-bottom:16px">매장을 등록하고 AIRCTT 플랫폼에서 AR 쿠폰을 발행하세요.</p>
+  <div class="form-group">
+    <label>매장명</label>
+    <input type="text" class="form-control" id="storeName" placeholder="예: 우체부오빠네 카페">
+  </div>
+  <div class="form-group">
+    <label>업종</label>
+    <select class="form-control" id="storeCategory">
+      <option value="">선택하세요</option>
+      <option value="food">음식점</option>
+      <option value="cafe">카페</option>
+      <option value="beauty">뷰티/미용</option>
+      <option value="retail">소매/판매</option>
+      <option value="leisure">레저/오락</option>
+      <option value="etc">기타</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>매장 주소</label>
+    <input type="text" class="form-control" id="storeAddress" placeholder="예: 서울시 강남구...">
+  </div>
+  <div class="form-group">
+    <label>대표자 연락처</label>
+    <input type="tel" class="form-control" id="storePhone" placeholder="010-0000-0000">
+  </div>
+  <div class="form-group">
+    <label>사업자등록번호</label>
+    <input type="text" class="form-control" id="storeBizNo" placeholder="000-00-00000">
+  </div>
+  <button class="btn btn-primary btn-block" onclick="applyStore()">
+    <i class="fas fa-paper-plane"></i> 입점 신청하기
+  </button>
+</div>
+
+<div id="storeStatusCard" class="hide">
+  <div class="card">
+    <h3><i class="fas fa-clipboard-check" style="color:var(--warn)"></i> 내 입점 현황</h3>
+    <div id="storeStatusList"></div>
+  </div>
+</div>
+
+<div class="card">
+  <h3><i class="fas fa-list" style="color:var(--p)"></i> 전체 입점 매장</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>매장명</th><th>업종</th><th>상태</th><th>신청일</th></tr></thead>
+      <tbody id="storeTableBody"><tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,.3)">등록된 매장이 없습니다</td></tr></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ========== MERCHANT PAGE (쿠폰관리) ========== -->
+<div class="page" id="page-merchant">
+<h2 style="margin-bottom:20px"><i class="fas fa-ticket-alt" style="color:var(--p)"></i> 쿠폰 관리 (머천트)</h2>
+
+<div id="merchantNeedLogin" class="card" style="text-align:center">
+  <i class="fas fa-lock" style="font-size:2em;color:var(--warn);margin-bottom:12px"></i>
+  <h3 style="justify-content:center">매장 로그인 필요</h3>
+  <p>쿠폰을 관리하려면 매장 사장님으로 로그인하세요.</p>
+  <button class="btn btn-primary" style="margin-top:12px" onclick="loginAs('merchant')">매장 사장님 로그인</button>
+</div>
+
+<div id="merchantPanel" class="hide">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <h3><i class="fas fa-ticket-alt" style="color:var(--p)"></i> 내 쿠폰 목록</h3>
+    <button class="btn btn-primary btn-sm" onclick="openCouponWizard()">
+      <i class="fas fa-plus"></i> 새 쿠폰 만들기
+    </button>
+  </div>
+
+  <div id="merchantCouponList">
+    <div class="card" style="text-align:center;color:rgba(255,255,255,.3)">
+      <i class="fas fa-inbox" style="font-size:2em;margin-bottom:8px"></i>
+      <p>아직 발행한 쿠폰이 없습니다</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== ADMIN PAGE (최종관리자) ========== -->
+<div class="page" id="page-admin">
+<h2 style="margin-bottom:20px"><i class="fas fa-shield-alt" style="color:var(--warn)"></i> 최종관리자 패널</h2>
+
+<div id="adminNeedLogin" class="card" style="text-align:center">
+  <i class="fas fa-crown" style="font-size:2em;color:var(--warn);margin-bottom:12px"></i>
+  <h3 style="justify-content:center">관리자 로그인 필요</h3>
+  <p>zeus1404@gmail.com 최종관리자 권한이 필요합니다.</p>
+  <button class="btn btn-primary" style="margin-top:12px" onclick="loginAs('admin')">관리자 로그인</button>
+</div>
+
+<div id="adminPanel" class="hide">
+  <div class="stats">
+    <div class="stat-card"><div class="num" id="adminPending">0</div><div class="label">승인대기</div></div>
+    <div class="stat-card"><div class="num" id="adminApproved">0</div><div class="label">승인완료</div></div>
+    <div class="stat-card"><div class="num" id="adminRejected">0</div><div class="label">거절</div></div>
+    <div class="stat-card"><div class="num" id="adminStores">0</div><div class="label">입점매장</div></div>
+  </div>
+
+  <!-- Store Approvals -->
+  <div class="card">
+    <h3><i class="fas fa-store" style="color:var(--p)"></i> 매장 입점 승인</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>매장명</th><th>업종</th><th>신청일</th><th>상태</th><th>관리</th></tr></thead>
+        <tbody id="adminStoreTable"><tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,.3)">승인 대기 항목 없음</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Coupon Approvals -->
+  <div class="card">
+    <h3><i class="fas fa-ticket-alt" style="color:var(--s)"></i> 쿠폰 승인 대기</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>쿠폰명</th><th>매장</th><th>수량</th><th>결제금</th><th>상태</th><th>관리</th></tr></thead>
+        <tbody id="adminCouponTable"><tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,.3)">승인 대기 쿠폰 없음</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- System Log -->
+  <div class="card">
+    <h3><i class="fas fa-history" style="color:rgba(255,255,255,.4)"></i> 시스템 로그</h3>
+    <div id="adminLog" style="max-height:200px;overflow-y:auto;font-size:.82em;color:rgba(255,255,255,.5)">
+      <p>시스템 시작됨...</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== GAME PAGE (AR 게임) ========== -->
+<div class="page" id="page-game">
+<h2 style="margin-bottom:20px"><i class="fas fa-gamepad" style="color:var(--s)"></i> AR 쿠폰 게임</h2>
+
+<div class="game-hud">
+  <div class="score"><i class="fas fa-star" style="color:var(--warn)"></i> 점수: <span id="gameScore">0</span></div>
+  <div class="timer"><i class="fas fa-clock"></i> <span id="gameTimer">30</span>초</div>
+  <div><i class="fas fa-ticket-alt" style="color:var(--success)"></i> 획득: <span id="gameCoupons">0</span></div>
+</div>
+
+<div class="game-area" id="gameArea">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:5" id="gameStartOverlay">
+    <div style="font-size:4em;margin-bottom:16px">🎮</div>
+    <h2 style="margin-bottom:12px">AR 쿠폰 헌터</h2>
+    <p style="color:rgba(255,255,255,.6);margin-bottom:20px">떠다니는 쿠폰을 터치하여 획득하세요!</p>
+    <button class="btn btn-primary glow" onclick="startGame()" id="gameStartBtn">
+      <i class="fas fa-play"></i> 게임 시작
+    </button>
+  </div>
+  <div id="gameObjects"></div>
+  <!-- AR-like background elements -->
+  <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none" id="gameBgEffects">
+    <div style="position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(108,99,255,.1),transparent);top:10%;left:20%;animation:float 6s ease-in-out infinite"></div>
+    <div style="position:absolute;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,101,132,.1),transparent);bottom:20%;right:15%;animation:float 8s ease-in-out infinite reverse"></div>
+  </div>
+</div>
+
+<div id="gameResult" class="hide" style="margin-top:16px">
+  <div class="card" style="text-align:center">
+    <div style="font-size:3em;margin-bottom:12px">🎉</div>
+    <h3 style="justify-content:center;font-size:1.3em">게임 완료!</h3>
+    <p style="margin:12px 0">점수: <strong id="finalScore" style="color:var(--p);font-size:1.3em">0</strong></p>
+    <p style="margin-bottom:16px">획득 쿠폰: <strong id="finalCoupons" style="color:var(--success)">0</strong>장</p>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button class="btn btn-primary" onclick="startGame()"><i class="fas fa-redo"></i> 다시하기</button>
+      <button class="btn btn-outline" onclick="showPage('wallet')"><i class="fas fa-wallet"></i> 지갑 확인</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== WALLET PAGE (지갑) ========== -->
+<div class="page" id="page-wallet">
+<h2 style="margin-bottom:20px"><i class="fas fa-wallet" style="color:var(--success)"></i> 쿠폰 지갑</h2>
+
+<div class="card" style="background:linear-gradient(135deg,rgba(108,99,255,.15),rgba(255,101,132,.1));border-color:rgba(108,99,255,.3)">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div style="font-size:.85em;color:rgba(255,255,255,.5)">보유 쿠폰</div>
+      <div style="font-size:2.5em;font-weight:900;background:linear-gradient(135deg,var(--p),var(--s));-webkit-background-clip:text;-webkit-text-fill-color:transparent" id="walletCount">0</div>
+    </div>
+    <div style="font-size:3em;opacity:.3">💎</div>
+  </div>
+</div>
+
+<div id="walletList">
+  <div class="card" style="text-align:center;color:rgba(255,255,255,.3)">
+    <i class="fas fa-inbox" style="font-size:2em;margin-bottom:8px"></i>
+    <p>아직 획득한 쿠폰이 없습니다</p>
+    <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="showPage('game')">게임하러 가기</button>
+  </div>
+</div>
+</div>
+
+<!-- ========== COUPON WIZARD MODAL ========== -->
+<div class="modal-overlay hide" id="couponWizard">
+<div class="modal">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <h2 style="margin:0"><i class="fas fa-magic" style="color:var(--p)"></i> 새 쿠폰 만들기</h2>
+    <button style="background:none;border:none;color:var(--text);font-size:1.5em;cursor:pointer" onclick="closeCouponWizard()">&times;</button>
+  </div>
+
+  <div class="steps">
+    <div class="step-dot active" id="stepDot1"></div>
+    <div class="step-dot" id="stepDot2"></div>
+    <div class="step-dot" id="stepDot3"></div>
+  </div>
+
+  <!-- STEP 1: 기본 정보 -->
+  <div id="wizStep1">
+    <h3 style="margin-bottom:16px;color:var(--p)">Step 1. 쿠폰 기본 정보</h3>
+    <div class="form-group">
+      <label>쿠폰명</label>
+      <input type="text" class="form-control" id="cpName" placeholder="예: 봄맞이 20% 할인">
+    </div>
+    <div class="form-group">
+      <label>쿠폰 이미지/영상 (720x900)</label>
+      <div class="upload-area" onclick="document.getElementById('cpImage').click()">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p style="font-size:.85em;color:rgba(255,255,255,.5)">클릭하여 업로드 (720x900 권장)</p>
+        <input type="file" id="cpImage" accept="image/*,video/*" style="display:none" onchange="handleUpload(this)">
+      </div>
+      <div id="cpImagePreview" style="margin-top:8px"></div>
+    </div>
+    <div class="form-group">
+      <label>할인 유형</label>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm" id="discTypePercent" onclick="setDiscountType('percent')" style="background:var(--p);color:#fff">% 할인</button>
+        <button class="btn btn-sm btn-outline" id="discTypeWon" onclick="setDiscountType('won')">₩ 할인</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>할인값 (<span id="discUnitLabel">%</span>)</label>
+      <input type="number" class="form-control" id="cpDiscount" placeholder="20" min="1">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>시작일</label>
+        <input type="date" class="form-control" id="cpStartDate">
+      </div>
+      <div class="form-group">
+        <label>종료일</label>
+        <input type="date" class="form-control" id="cpEndDate">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>최소 주문 금액 (₩)</label>
+        <input type="number" class="form-control" id="cpMinOrder" placeholder="10000">
+      </div>
+      <div class="form-group">
+        <label>최대 할인 금액 (₩)</label>
+        <input type="number" class="form-control" id="cpMaxDiscount" placeholder="5000">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>발행 수량 (장)</label>
+      <input type="number" class="form-control" id="cpQuantity" placeholder="100" min="1">
+    </div>
+    <button class="btn btn-primary btn-block" onclick="wizardNext(2)">
+      다음: 배포 범위 설정 <i class="fas fa-arrow-right"></i>
+    </button>
+  </div>
+
+  <!-- STEP 2: 지도 + 반경 -->
+  <div id="wizStep2" class="hide">
+    <h3 style="margin-bottom:16px;color:var(--p)">Step 2. 배포 반경 설정</h3>
+    <div class="form-group">
+      <label>배포 중심 위치</label>
+      <input type="text" class="form-control" id="cpLocation" placeholder="주소 입력 또는 지도 클릭" value="">
+    </div>
+    <div class="form-group">
+      <label>배포 반경: <span id="radiusLabel">500</span>m</label>
+      <input type="range" id="cpRadius" min="100" max="5000" value="500" step="100" oninput="updateRadius(this.value)">
+    </div>
+    <div class="map-sim" id="mapSim">
+      <div class="grid"></div>
+      <div class="center-pin"></div>
+      <div class="radius-circle" id="radiusCircle" style="width:120px;height:120px"></div>
+      <div style="position:absolute;bottom:8px;left:8px;font-size:.7em;color:rgba(255,255,255,.3);z-index:3">
+        <i class="fas fa-map-marker-alt"></i> 시뮬레이션 지도 (실제 배포시 카카오맵/구글맵 연동)
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-outline" onclick="wizardNext(1)" style="flex:1">
+        <i class="fas fa-arrow-left"></i> 이전
+      </button>
+      <button class="btn btn-primary" onclick="wizardNext(3)" style="flex:2">
+        다음: 결제 확인 <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 3: 결제 확인 -->
+  <div id="wizStep3" class="hide">
+    <h3 style="margin-bottom:16px;color:var(--p)">Step 3. 결제 확인</h3>
+    <div style="background:var(--card2);border-radius:var(--r);padding:20px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+        <span style="color:rgba(255,255,255,.5)">쿠폰명</span>
+        <span id="confirmName" style="font-weight:600">-</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+        <span style="color:rgba(255,255,255,.5)">할인</span>
+        <span id="confirmDiscount" style="font-weight:600;color:var(--s)">-</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+        <span style="color:rgba(255,255,255,.5)">기간</span>
+        <span id="confirmPeriod" style="font-weight:600">-</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+        <span style="color:rgba(255,255,255,.5)">배포 반경</span>
+        <span id="confirmRadius" style="font-weight:600">-</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+        <span style="color:rgba(255,255,255,.5)">수량</span>
+        <span id="confirmQty" style="font-weight:600">-</span>
+      </div>
+      <hr style="border-color:rgba(255,255,255,.1);margin:16px 0">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="color:rgba(255,255,255,.5)">단가</span>
+        <span style="font-weight:600">100원 / 장</span>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <span style="font-weight:700;font-size:1.1em">총 결제 금액</span>
+        <span id="confirmTotal" style="font-weight:900;font-size:1.3em;color:var(--p)">-</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>결제 수단</label>
+      <select class="form-control" id="payMethod">
+        <option value="card">신용카드</option>
+        <option value="bank">계좌이체</option>
+        <option value="vbank">가상계좌</option>
+      </select>
+    </div>
+    <p style="font-size:.78em;color:rgba(255,255,255,.3);margin-bottom:16px;text-align:center">
+      * 실전 결제는 VAN/PG 연동 단계에서 구현됩니다. 현재는 시뮬레이션입니다.
+    </p>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" onclick="wizardNext(2)" style="flex:1">
+        <i class="fas fa-arrow-left"></i> 이전
+      </button>
+      <button class="btn btn-success" onclick="processPayment()" style="flex:2" id="payBtn">
+        <i class="fas fa-credit-card"></i> 결제하기
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ========== COUPON USE MODAL ========== -->
+<div class="modal-overlay hide" id="couponUseModal">
+<div class="modal" style="text-align:center">
+  <div style="font-size:3em;margin-bottom:16px" id="useModalIcon">🎟️</div>
+  <h2 style="justify-content:center" id="useModalTitle">쿠폰 사용</h2>
+  <p id="useModalDesc" style="color:rgba(255,255,255,.6);margin-bottom:8px"></p>
+  <div style="font-size:2em;font-weight:900;color:var(--s);margin:16px 0" id="useModalDiscount"></div>
+  <p style="font-size:.85em;color:rgba(255,255,255,.4);margin-bottom:20px" id="useModalExpiry"></p>
+  <div style="display:flex;gap:8px;flex-direction:column">
+    <button class="btn btn-success btn-block" onclick="useCouponNow()">
+      <i class="fas fa-shopping-cart"></i> 즉시 사용 (매장 할인 적용)
+    </button>
+    <button class="btn btn-primary btn-block" id="useModalStoreBtn" onclick="goToStore()">
+      <i class="fas fa-external-link-alt"></i> 매장 페이지로 이동
+    </button>
+    <button class="btn btn-outline btn-block" onclick="closeCouponUseModal()">닫기</button>
+  </div>
+</div>
+</div>
+
+<!-- ========== REJECT REASON MODAL ========== -->
+<div class="modal-overlay hide" id="rejectModal">
+<div class="modal">
+  <h2><i class="fas fa-ban" style="color:var(--danger)"></i> 거절 사유</h2>
+  <div class="form-group">
+    <label>거절 사유를 입력하세요</label>
+    <textarea class="form-control" id="rejectReason" rows="3" placeholder="거절 사유를 입력하세요..."></textarea>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-outline" onclick="closeRejectModal()" style="flex:1">취소</button>
+    <button class="btn btn-danger" onclick="confirmReject()" style="flex:1">거절 확인</button>
+  </div>
+</div>
+</div>
+
+<!-- ========== JAVASCRIPT ========== -->
+<script>
+/* ====== DATABASE (localStorage) ====== */
+const DB = {
+  get(key) { try { return JSON.parse(localStorage.getItem('airctt_' + key)) || null; } catch(e) { return null; } },
+  set(key, val) { localStorage.setItem('airctt_' + key, JSON.stringify(val)); },
+  getAll(key) { return this.get(key) || []; },
+  push(key, item) { const arr = this.getAll(key); arr.push(item); this.set(key, arr); return arr; },
+  update(key, id, updates) {
+    const arr = this.getAll(key);
+    const idx = arr.findIndex(x => x.id === id);
+    if (idx >= 0) { Object.assign(arr[idx], updates); this.set(key, arr); }
+    return arr;
+  }
+};
+
+/* ====== STATE ====== */
+let currentUser = DB.get('currentUser') || null;
+let currentRole = DB.get('currentRole') || null;
+let discountType = 'percent';
+let gameInterval = null;
+let gameTimer = 30;
+let gameScore = 0;
+let gameCouponsCollected = 0;
+let rejectTargetId = null;
+let rejectTargetType = null;
+let selectedCouponForUse = null;
+
+/* ====== INIT ====== */
+document.addEventListener('DOMContentLoaded', () => {
+  if (currentUser) updateUserUI();
+  updateStats();
+  addLog('시스템 초기화 완료');
+  // Force local login ON
+  if (!currentUser) {
+    loginAs('user');
+  }
+});
+
+/* ====== AUTH ====== */
+function loginAs(role) {
+  const roles = {
+    admin: { name: 'zeus1404 (최종관리자)', email: 'zeus1404@gmail.com', role: 'admin', avatar: '👑' },
+    merchant: { name: '우체부오빠네', email: 'merchant@airctt.com', role: 'merchant', avatar: '🏪' },
+    user: { name: '쿠폰헌터', email: 'user@airctt.com', role: 'user', avatar: '🎮' }
+  };
+  currentUser = roles[role];
+  currentRole = role;
+  DB.set('currentUser', currentUser);
+  DB.set('currentRole', currentRole);
+  updateUserUI();
+  toast(currentUser.name + ' (으)로 로그인했습니다', 'success');
+  addLog(currentUser.name + ' 로그인');
+
+  // Show/hide panels based on role
+  if (role === 'merchant' || role === 'admin') {
+    document.getElementById('merchantNeedLogin').classList.add('hide');
+    document.getElementById('merchantPanel').classList.remove('hide');
+  }
+  if (role === 'admin') {
+    document.getElementById('adminNeedLogin').classList.add('hide');
+    document.getElementById('adminPanel').classList.remove('hide');
+    refreshAdminTables();
+  }
+  if (role !== 'admin') {
+    document.getElementById('adminNeedLogin').classList.remove('hide');
+    document.getElementById('adminPanel').classList.add('hide');
+  }
+  if (role !== 'merchant' && role !== 'admin') {
+    document.getElementById('merchantNeedLogin').classList.remove('hide');
+    document.getElementById('merchantPanel').classList.add('hide');
+  }
+}
+
+function updateUserUI() {
+  if (!currentUser) return;
+  document.getElementById('currentUser').textContent = currentUser.name;
+  document.getElementById('userAvatar').textContent = currentUser.avatar;
+  updateStats();
+  refreshMerchantCoupons();
+  refreshStoreTable();
+  refreshWallet();
+}
+
+/* ====== NAVIGATION ====== */
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  // Update nav active states
+  document.querySelectorAll('.topnav .nav-links button').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === name);
+  });
+  document.querySelectorAll('.bottom-nav .nav-item').forEach((b, i) => {
+    const pages = ['home','store','merchant','game','wallet'];
+    b.classList.toggle('active', pages[i] === name);
+  });
+  // Refresh data on page show
+  if (name === 'admin' && currentRole === 'admin') refreshAdminTables();
+  if (name === 'wallet') refreshWallet();
+  if (name === 'merchant') refreshMerchantCoupons();
+}
+
+/* ====== TOAST ====== */
+function toast(msg, type = 'success') {
+  const t = document.createElement('div');
+  t.className = 'toast' + (type === 'error' ? ' error' : '');
+  t.innerHTML = '<div style="display:flex;align-items:center;gap:8px"><i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '" style="color:' + (type === 'success' ? 'var(--success)' : 'var(--danger)') + '"></i>' + msg + '</div>';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+/* ====== PARTICLES ====== */
+function spawnParticles(x, y, count = 12) {
+  const emojis = ['✨','🎉','💰','🎟️','⭐','💎','🔥'];
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    p.style.left = (x + (Math.random() - 0.5) * 100) + 'px';
+    p.style.top = (y + (Math.random() - 0.5) * 100) + 'px';
+    p.style.fontSize = (1 + Math.random() * 1.5) + 'em';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1000);
+  }
+}
+
+/* ====== SOUND ====== */
+function playSound(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    if (type === 'collect') {
+      osc.frequency.setValueAtTime(587, ctx.currentTime);
+      osc.frequency.setValueAtTime(784, ctx.currentTime + 0.1);
+      osc.frequency.setValueAtTime(1047, ctx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.4);
+    } else if (type === 'success') {
+      osc.frequency.setValueAtTime(523, ctx.currentTime);
+      osc.frequency.setValueAtTime(659, ctx.currentTime + 0.15);
+      osc.frequency.setValueAtTime(784, ctx.currentTime + 0.3);
+      osc.frequency.setValueAtTime(1047, ctx.currentTime + 0.45);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.6);
+    } else if (type === 'error') {
+      osc.frequency.setValueAtTime(200, ctx.currentTime);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.3);
+    }
+  } catch(e) {}
+}
+
+/* ====== LOG ====== */
+function addLog(msg) {
+  const el = document.getElementById('adminLog');
+  if (!el) return;
+  const time = new Date().toLocaleTimeString('ko-KR');
+  el.innerHTML = '<p>[' + time + '] ' + msg + '</p>' + el.innerHTML;
+  // Also store in DB
+  DB.push('logs', { time, msg });
+}
+
+/* ====== STORE (매장입점) ====== */
+function applyStore() {
+  const name = document.getElementById('storeName').value.trim();
+  const cat = document.getElementById('storeCategory').value;
+  const addr = document.getElementById('storeAddress').value.trim();
+  const phone = document.getElementById('storePhone').value.trim();
+  const bizNo = document.getElementById('storeBizNo').value.trim();
+  if (!name || !cat || !addr) { toast('매장명, 업종, 주소는 필수입니다', 'error'); return; }
+
+  const store = {
+    id: 'store_' + Date.now(),
+    name, category: cat, address: addr, phone, bizNo,
+    status: 'pending', // pending | approved | rejected
+    appliedAt: new Date().toISOString(),
+    rejectedReason: ''
+  };
+  DB.push('stores', store);
+  toast('입점 신청이 완료되었습니다! 관리자 승인을 기다려주세요.');
+  playSound('success');
+  addLog('매장 입점 신청: ' + name);
+
+  // Clear form
+  document.getElementById('storeName').value = '';
+  document.getElementById('storeCategory').value = '';
+  document.getElementById('storeAddress').value = '';
+  document.getElementById('storePhone').value = '';
+  document.getElementById('storeBizNo').value = '';
+
+  // Show status
+  document.getElementById('storeStatusCard').classList.remove('hide');
+  refreshStoreTable();
+  updateStats();
+}
+
+function refreshStoreTable() {
+  const stores = DB.getAll('stores');
+  const tbody = document.getElementById('storeTableBody');
+  const statusEl = document.getElementById('storeStatusList');
+  const cats = {food:'음식점',cafe:'카페',beauty:'뷰티',retail:'소매',leisure:'레저',etc:'기타'};
+  const statusBadge = {pending:'badge-pending',approved:'badge-approved',rejected:'badge-rejected'};
+  const statusText = {pending:'승인대기중',approved:'승인완료',rejected:'거절됨'};
+
+  if (stores.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,.3)">등록된 매장이 없습니다</td></tr>';
+    return;
+  }
+  tbody.innerHTML = stores.map(s => '<tr><td>' + s.name + '</td><td>' + (cats[s.category]||s.category) + '</td><td><span class="badge ' + statusBadge[s.status] + '">' + statusText[s.status] + '</span></td><td>' + new Date(s.appliedAt).toLocaleDateString('ko-KR') + '</td></tr>').join('');
+
+  if (statusEl) {
+    statusEl.innerHTML = stores.map(s => '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span>' + s.name + '</span><span class="badge ' + statusBadge[s.status] + '">' + statusText[s.status] + '</span></div>').join('');
+    if (stores.length > 0) document.getElementById('storeStatusCard').classList.remove('hide');
+  }
+}
+
+/* ====== COUPON WIZARD ====== */
+function openCouponWizard() {
+  if (currentRole !== 'merchant' && currentRole !== 'admin') {
+    toast('매장 사장님으로 로그인하세요', 'error');
+    return;
+  }
+  // Check if store is approved
+  const stores = DB.getAll('stores');
+  const approved = stores.find(s => s.status === 'approved');
+  if (!approved && currentRole === 'merchant') {
+    toast('승인된 매장이 필요합니다. 먼저 매장을 등록하고 승인받으세요.', 'error');
+    return;
+  }
+  document.getElementById('couponWizard').classList.remove('hide');
+  wizardNext(1);
+  // Set default dates
+  const today = new Date();
+  document.getElementById('cpStartDate').value = today.toISOString().split('T')[0];
+  const endDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+  document.getElementById('cpEndDate').value = endDate.toISOString().split('T')[0];
+}
+
+function closeCouponWizard() {
+  document.getElementById('couponWizard').classList.add('hide');
+}
+
+function wizardNext(step) {
+  document.getElementById('wizStep1').classList.toggle('hide', step !== 1);
+  document.getElementById('wizStep2').classList.toggle('hide', step !== 2);
+  document.getElementById('wizStep3').classList.toggle('hide', step !== 3);
+  document.getElementById('stepDot1').className = 'step-dot ' + (step >= 1 ? (step > 1 ? 'done' : 'active') : '');
+  document.getElementById('stepDot2').className = 'step-dot ' + (step >= 2 ? (step > 2 ? 'done' : 'active') : '');
+  document.getElementById('stepDot3').className = 'step-dot ' + (step >= 3 ? 'active' : '');
+
+  if (step === 2) {
+    // Validate step 1
+    if (!document.getElementById('cpName').value.trim()) { toast('쿠폰명을 입력하세요', 'error'); wizardNext(1); return; }
+    if (!document.getElementById('cpDiscount').value) { toast('할인값을 입력하세요', 'error'); wizardNext(1); return; }
+    if (!document.getElementById('cpQuantity').value) { toast('발행 수량을 입력하세요', 'error'); wizardNext(1); return; }
+    // Set default location
+    const stores = DB.getAll('stores');
+    const approved = stores.find(s => s.status === 'approved');
+    if (approved && !document.getElementById('cpLocation').value) {
+      document.getElementById('cpLocation').value = approved.address || '서울시 강남구';
+    }
+  }
+
+  if (step === 3) {
+    // Populate confirmation
+    const name = document.getElementById('cpName').value;
+    const disc = document.getElementById('cpDiscount').value;
+    const qty = parseInt(document.getElementById('cpQuantity').value) || 0;
+    const unit = discountType === 'percent' ? '%' : '₩';
+    document.getElementById('confirmName').textContent = name;
+    document.getElementById('confirmDiscount').textContent = disc + unit;
+    document.getElementById('confirmPeriod').textContent = document.getElementById('cpStartDate').value + ' ~ ' + document.getElementById('cpEndDate').value;
+    document.getElementById('confirmRadius').textContent = document.getElementById('cpRadius').value + 'm';
+    document.getElementById('confirmQty').textContent = qty.toLocaleString() + '장';
+    document.getElementById('confirmTotal').textContent = (qty * 100).toLocaleString() + '원';
+  }
+}
+
+function setDiscountType(type) {
+  discountType = type;
+  document.getElementById('discTypePercent').className = 'btn btn-sm ' + (type === 'percent' ? '' : 'btn-outline');
+  document.getElementById('discTypePercent').style.background = type === 'percent' ? 'var(--p)' : 'transparent';
+  document.getElementById('discTypePercent').style.color = type === 'percent' ? '#fff' : 'var(--p)';
+  document.getElementById('discTypeWon').className = 'btn btn-sm ' + (type === 'won' ? '' : 'btn-outline');
+  document.getElementById('discTypeWon').style.background = type === 'won' ? 'var(--p)' : 'transparent';
+  document.getElementById('discTypeWon').style.color = type === 'won' ? '#fff' : 'var(--p)';
+  document.getElementById('discUnitLabel').textContent = type === 'percent' ? '%' : '₩';
+}
+
+function handleUpload(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const preview = document.getElementById('cpImagePreview');
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        preview.innerHTML = '<img src="' + e.target.result + '" style="max-width:100%;max-height:200px;border-radius:12px">';
+      };
+      reader.readAsDataURL(file);
+    } else {
+      preview.innerHTML = '<p style="color:var(--success);font-size:.85em"><i class="fas fa-check"></i> ' + file.name + ' 업로드됨</p>';
+    }
+  }
+}
+
+function updateRadius(val) {
+  document.getElementById('radiusLabel').textContent = val;
+  const size = Math.max(40, (val / 5000) * 220);
+  const circle = document.getElementById('radiusCircle');
+  circle.style.width = size + 'px';
+  circle.style.height = size + 'px';
+}
+
+/* ====== PAYMENT ====== */
+function processPayment() {
+  const btn = document.getElementById('payBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 결제 처리중...';
+
+  setTimeout(() => {
+    const qty = parseInt(document.getElementById('cpQuantity').value) || 0;
+    const totalAmount = qty * 100;
+
+    const coupon = {
+      id: 'cp_' + Date.now(),
+      name: document.getElementById('cpName').value,
+      discountType: discountType,
+      discountValue: parseInt(document.getElementById('cpDiscount').value),
+      startDate: document.getElementById('cpStartDate').value,
+      endDate: document.getElementById('cpEndDate').value,
+      minOrder: parseInt(document.getElementById('cpMinOrder').value) || 0,
+      maxDiscount: parseInt(document.getElementById('cpMaxDiscount').value) || 0,
+      quantity: qty,
+      remaining: qty,
+      radius: parseInt(document.getElementById('cpRadius').value),
+      location: document.getElementById('cpLocation').value,
+      payMethod: document.getElementById('payMethod').value,
+      totalPaid: totalAmount,
+      status: 'pending', // pending | approved | rejected | active
+      createdAt: new Date().toISOString(),
+      merchantName: currentUser ? currentUser.name : 'Unknown',
+      deployedToGame: false,
+      rejectedReason: ''
+    };
+
+    DB.push('coupons', coupon);
+    playSound('success');
+    spawnParticles(window.innerWidth / 2, window.innerHeight / 2, 20);
+    toast('결제 완료! 총 ' + totalAmount.toLocaleString() + '원 (승인 대기중)');
+    addLog('쿠폰 결제 완료: ' + coupon.name + ' (' + qty + '장, ' + totalAmount.toLocaleString() + '원)');
+
+    closeCouponWizard();
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-credit-card"></i> 결제하기';
+
+    refreshMerchantCoupons();
+    updateStats();
+  }, 2000);
+}
+
+function refreshMerchantCoupons() {
+  const coupons = DB.getAll('coupons');
+  const el = document.getElementById('merchantCouponList');
+  if (!el) return;
+  if (coupons.length === 0) {
+    el.innerHTML = '<div class="card" style="text-align:center;color:rgba(255,255,255,.3)"><i class="fas fa-inbox" style="font-size:2em;margin-bottom:8px"></i><p>아직 발행한 쿠폰이 없습니다</p></div>';
+    return;
+  }
+  const statusBadge = {pending:'badge-pending',approved:'badge-approved',rejected:'badge-rejected',active:'badge-approved'};
+  const statusText = {pending:'승인대기',approved:'승인완료',rejected:'거절됨',active:'활성화'};
+  el.innerHTML = coupons.map(c => {
+    const unit = c.discountType === 'percent' ? '%' : '₩';
+    return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:start"><div><h3><i class="fas fa-ticket-alt" style="color:var(--p)"></i> ' + c.name + '</h3><p>' + c.discountValue + unit + ' 할인 | ' + c.quantity + '장 발행 | 반경 ' + c.radius + 'm</p><p style="font-size:.78em;color:rgba(255,255,255,.3);margin-top:4px">' + c.startDate + ' ~ ' + c.endDate + '</p>' + (c.rejectedReason ? '<p style="font-size:.82em;color:var(--danger);margin-top:4px"><i class="fas fa-exclamation-triangle"></i> 거절사유: ' + c.rejectedReason + '</p>' : '') + '</div><span class="badge ' + (statusBadge[c.status]||'') + '">' + (statusText[c.status]||c.status) + '</span></div></div>';
+  }).join('');
+}
+
+/* ====== ADMIN ====== */
+function refreshAdminTables() {
+  const stores = DB.getAll('stores');
+  const coupons = DB.getAll('coupons');
+
+  // Stats
+  document.getElementById('adminPending').textContent = coupons.filter(c => c.status === 'pending').length + stores.filter(s => s.status === 'pending').length;
+  document.getElementById('adminApproved').textContent = coupons.filter(c => c.status === 'approved' || c.status === 'active').length;
+  document.getElementById('adminRejected').textContent = coupons.filter(c => c.status === 'rejected').length + stores.filter(s => s.status === 'rejected').length;
+  document.getElementById('adminStores').textContent = stores.filter(s => s.status === 'approved').length;
+
+  // Store table
+  const cats = {food:'음식점',cafe:'카페',beauty:'뷰티',retail:'소매',leisure:'레저',etc:'기타'};
+  const storeTable = document.getElementById('adminStoreTable');
+  if (stores.length === 0) {
+    storeTable.innerHTML = '<tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,.3)">매장 없음</td></tr>';
+  } else {
+    storeTable.innerHTML = stores.map(s => {
+      const badge = {pending:'badge-pending',approved:'badge-approved',rejected:'badge-rejected'};
+      const text = {pending:'대기',approved:'승인',rejected:'거절'};
+      let actions = '';
+      if (s.status === 'pending') {
+        actions = '<button class="btn btn-success btn-sm" onclick="approveStore(\'' + s.id + '\')"><i class="fas fa-check"></i></button> <button class="btn btn-danger btn-sm" onclick="openRejectModal(\'' + s.id + '\',\'store\')"><i class="fas fa-times"></i></button>';
+      } else {
+        actions = '<span style="font-size:.8em;color:rgba(255,255,255,.3)">처리완료</span>';
+      }
+      return '<tr><td>' + s.name + '</td><td>' + (cats[s.category]||'') + '</td><td>' + new Date(s.appliedAt).toLocaleDateString('ko-KR') + '</td><td><span class="badge ' + badge[s.status] + '">' + text[s.status] + '</span></td><td>' + actions + '</td></tr>';
+    }).join('');
+  }
+
+  // Coupon table
+  const couponTable = document.getElementById('adminCouponTable');
+  if (coupons.length === 0) {
+    couponTable.innerHTML = '<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,.3)">쿠폰 없음</td></tr>';
+  } else {
+    couponTable.innerHTML = coupons.map(c => {
+      const badge = {pending:'badge-pending',approved:'badge-approved',rejected:'badge-rejected',active:'badge-approved'};
+      const text = {pending:'대기',approved:'승인',rejected:'거절',active:'활성'};
+      let actions = '';
+      if (c.status === 'pending') {
+        actions = '<button class="btn btn-success btn-sm" onclick="approveCoupon(\'' + c.id + '\')"><i class="fas fa-check"></i></button> <button class="btn btn-danger btn-sm" onclick="openRejectModal(\'' + c.id + '\',\'coupon\')"><i class="fas fa-times"></i></button>';
+      } else {
+        actions = '<span style="font-size:.8em;color:rgba(255,255,255,.3)">처리완료</span>';
+      }
+      return '<tr><td>' + c.name + '</td><td>' + c.merchantName + '</td><td>' + c.quantity + '</td><td>' + c.totalPaid.toLocaleString() + '원</td><td><span class="badge ' + (badge[c.status]||'') + '">' + (text[c.status]||c.status) + '</span></td><td>' + actions + '</td></tr>';
+    }).join('');
+  }
+}
+
+function approveStore(id) {
+  DB.update('stores', id, { status: 'approved' });
+  toast('매장 승인 완료!');
+  playSound('success');
+  addLog('매장 승인: ' + id);
+  refreshAdminTables();
+  refreshStoreTable();
+  updateStats();
+}
+
+function approveCoupon(id) {
+  DB.update('coupons', id, { status: 'active', deployedToGame: true });
+  toast('쿠폰 승인 + 게임 배포 완료!');
+  playSound('success');
+  addLog('쿠폰 승인 + 게임 배포: ' + id);
+  refreshAdminTables();
+  refreshMerchantCoupons();
+  updateStats();
+}
+
+function openRejectModal(id, type) {
+  rejectTargetId = id;
+  rejectTargetType = type;
+  document.getElementById('rejectModal').classList.remove('hide');
+  document.getElementById('rejectReason').value = '';
+}
+
+function closeRejectModal() {
+  document.getElementById('rejectModal').classList.add('hide');
+  rejectTargetId = null;
+  rejectTargetType = null;
+}
+
+function confirmReject() {
+  const reason = document.getElementById('rejectReason').value.trim() || '사유 없음';
+  if (rejectTargetType === 'store') {
+    DB.update('stores', rejectTargetId, { status: 'rejected', rejectedReason: reason });
+    addLog('매장 거절: ' + rejectTargetId + ' (' + reason + ')');
+  } else {
+    DB.update('coupons', rejectTargetId, { status: 'rejected', rejectedReason: reason });
+    addLog('쿠폰 거절: ' + rejectTargetId + ' (' + reason + ')');
+  }
+  toast('거절 처리되었습니다.');
+  playSound('error');
+  closeRejectModal();
+  refreshAdminTables();
+  refreshStoreTable();
+  refreshMerchantCoupons();
+  updateStats();
+}
+
+/* ====== AR GAME ====== */
+function startGame() {
+  const activeCoupons = DB.getAll('coupons').filter(c => c.status === 'active' && c.remaining > 0);
+  // Allow game even with no active coupons (use demo coupons)
+  gameScore = 0;
+  gameCouponsCollected = 0;
+  gameTimer = 30;
+  document.getElementById('gameScore').textContent = '0';
+  document.getElementById('gameCoupons').textContent = '0';
+  document.getElementById('gameTimer').textContent = '30';
+  document.getElementById('gameStartOverlay').classList.add('hide');
+  document.getElementById('gameResult').classList.add('hide');
+  document.getElementById('gameObjects').innerHTML = '';
+
+  addLog('AR 게임 시작');
+
+  // Spawn coupon objects
+  spawnGameCoupons(activeCoupons);
+
+  // Start timer
+  if (gameInterval) clearInterval(gameInterval);
+  gameInterval = setInterval(() => {
+    gameTimer--;
+    document.getElementById('gameTimer').textContent = gameTimer;
+    if (gameTimer <= 0) endGame();
+    // Spawn new coupons periodically
+    if (gameTimer % 5 === 0) spawnGameCoupons(activeCoupons);
+  }, 1000);
+
+  // Update game play count
+  const plays = (DB.get('gamePlays') || 0) + 1;
+  DB.set('gamePlays', plays);
+  updateStats();
+}
+
+function spawnGameCoupons(activeCoupons) {
+  const area = document.getElementById('gameArea');
+  const objs = document.getElementById('gameObjects');
+  const areaRect = area.getBoundingClientRect();
+  const couponEmojis = ['🎟️','🎫','💰','🏷️','🎁','💎','⭐','🔥','🌟','💜'];
+  const count = 3 + Math.floor(Math.random() * 4);
+
+  for (let i = 0; i < count; i++) {
+    const obj = document.createElement('div');
+    obj.className = 'coupon-obj';
+    const x = 20 + Math.random() * (areaRect.width - 60);
+    const y = 20 + Math.random() * (areaRect.height - 60);
+    obj.style.left = x + 'px';
+    obj.style.top = y + 'px';
+    obj.style.animationDelay = (Math.random() * 2) + 's';
+    obj.textContent = couponEmojis[Math.floor(Math.random() * couponEmojis.length)];
+
+    // Attach coupon data if available
+    let cpData = null;
+    if (activeCoupons.length > 0) {
+      cpData = activeCoupons[Math.floor(Math.random() * activeCoupons.length)];
+    }
+
+    obj.addEventListener('click', (e) => collectCoupon(e, obj, cpData));
+    obj.addEventListener('touchstart', (e) => { e.preventDefault(); collectCoupon(e, obj, cpData); });
+    objs.appendChild(obj);
+
+    // Auto-remove after a while
+    setTimeout(() => {
+      if (obj.parentNode) {
+        obj.style.transition = 'opacity 0.5s';
+        obj.style.opacity = '0';
+        setTimeout(() => obj.remove(), 500);
+      }
+    }, 4000 + Math.random() * 4000);
+  }
+}
+
+function collectCoupon(e, obj, cpData) {
+  if (gameTimer <= 0) return;
+
+  // Get position for particles
+  const rect = obj.getBoundingClientRect();
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height / 2;
+
+  // Score & collect
+  const points = cpData ? 100 : 50;
+  gameScore += points;
+  gameCouponsCollected++;
+  document.getElementById('gameScore').textContent = gameScore;
+  document.getElementById('gameCoupons').textContent = gameCouponsCollected;
+
+  // Effects
+  playSound('collect');
+  spawnParticles(x, y, 8);
+
+  // Remove object with animation
+  obj.style.transform = 'scale(2)';
+  obj.style.opacity = '0';
+  setTimeout(() => obj.remove(), 300);
+
+  // Save to wallet
+  const walletItem = {
+    id: 'wc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+    couponId: cpData ? cpData.id : 'demo_' + Date.now(),
+    name: cpData ? cpData.name : '행운의 쿠폰',
+    discountType: cpData ? cpData.discountType : 'percent',
+    discountValue: cpData ? cpData.discountValue : (10 + Math.floor(Math.random() * 3) * 5),
+    merchantName: cpData ? cpData.merchantName : 'AIRCTT',
+    endDate: cpData ? cpData.endDate : new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0],
+    collectedAt: new Date().toISOString(),
+    used: false,
+    storeUrl: ''
+  };
+
+  // Duplicate prevention: check if same coupon already in wallet
+  const wallet = DB.getAll('wallet');
+  const existing = wallet.filter(w => w.couponId === walletItem.couponId && !w.used);
+  if (existing.length >= 5) {
+    // Max 5 of same coupon
+    toast('같은 쿠폰은 최대 5장까지!', 'error');
+  } else {
+    DB.push('wallet', walletItem);
+    // Decrease remaining if real coupon
+    if (cpData) {
+      const coupons = DB.getAll('coupons');
+      const idx = coupons.findIndex(c => c.id === cpData.id);
+      if (idx >= 0 && coupons[idx].remaining > 0) {
+        coupons[idx].remaining--;
+        DB.set('coupons', coupons);
+      }
+    }
+  }
+
+  // Show mini popup
+  const popup = document.createElement('div');
+  popup.style.cssText = 'position:fixed;left:' + x + 'px;top:' + (y - 30) + 'px;background:var(--card);padding:8px 16px;border-radius:20px;font-size:.85em;z-index:9999;border:1px solid var(--p);pointer-events:none;animation:fadeIn .3s;';
+  popup.innerHTML = '<span style="color:var(--success)">+' + points + '</span> ' + walletItem.discountValue + (walletItem.discountType === 'percent' ? '%' : '₩') + ' 할인!';
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 1500);
+}
+
+function endGame() {
+  clearInterval(gameInterval);
+  gameInterval = null;
+  document.getElementById('gameObjects').innerHTML = '';
+  document.getElementById('gameStartOverlay').classList.remove('hide');
+  document.getElementById('gameStartOverlay').querySelector('h2').textContent = '게임 종료!';
+  document.getElementById('gameStartBtn').innerHTML = '<i class="fas fa-redo"></i> 다시하기';
+  document.getElementById('gameResult').classList.remove('hide');
+  document.getElementById('finalScore').textContent = gameScore;
+  document.getElementById('finalCoupons').textContent = gameCouponsCollected;
+
+  playSound('success');
+  spawnParticles(window.innerWidth / 2, window.innerHeight / 2, 25);
+  addLog('AR 게임 종료: 점수 ' + gameScore + ', 쿠폰 ' + gameCouponsCollected + '장');
+  refreshWallet();
+  updateStats();
+}
+
+/* ====== WALLET ====== */
+function refreshWallet() {
+  const wallet = DB.getAll('wallet');
+  const el = document.getElementById('walletList');
+  const countEl = document.getElementById('walletCount');
+  if (!el || !countEl) return;
+
+  const activeWallet = wallet.filter(w => !w.used);
+  countEl.textContent = activeWallet.length;
+
+  if (activeWallet.length === 0) {
+    el.innerHTML = '<div class="card" style="text-align:center;color:rgba(255,255,255,.3)"><i class="fas fa-inbox" style="font-size:2em;margin-bottom:8px"></i><p>아직 획득한 쿠폰이 없습니다</p><button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="showPage(\'game\')">게임하러 가기</button></div>';
+    return;
+  }
+
+  el.innerHTML = activeWallet.map(w => {
+    const unit = w.discountType === 'percent' ? '%' : '₩';
+    const collectedDate = new Date(w.collectedAt);
+    return '<div class="wallet-card" onclick="openCouponUseModal(\'' + w.id + '\')">' +
+      '<div class="coupon-icon">🎟️</div>' +
+      '<div class="coupon-info">' +
+        '<h4>' + w.name + '</h4>' +
+        '<div class="discount">' + w.discountValue + unit + ' 할인</div>' +
+        '<div class="expiry"><i class="fas fa-store"></i> ' + w.merchantName + ' | <i class="fas fa-calendar"></i> ~' + w.endDate + '</div>' +
+        '<div class="expiry"><i class="fas fa-clock"></i> 획득: ' + collectedDate.toLocaleDateString('ko-KR') + ' ' + collectedDate.toLocaleTimeString('ko-KR') + '</div>' +
+      '</div>' +
+      '<i class="fas fa-chevron-right" style="color:rgba(255,255,255,.2)"></i>' +
+    '</div>';
+  }).join('');
+}
+
+function openCouponUseModal(walletId) {
+  const wallet = DB.getAll('wallet');
+  const item = wallet.find(w => w.id === walletId);
+  if (!item) return;
+
+  selectedCouponForUse = item;
+  const unit = item.discountType === 'percent' ? '%' : '₩';
+
+  document.getElementById('useModalTitle').textContent = item.name;
+  document.getElementById('useModalDesc').textContent = item.merchantName + ' 매장 쿠폰';
+  document.getElementById('useModalDiscount').textContent = item.discountValue + unit + ' 할인';
+  document.getElementById('useModalExpiry').textContent = '유효기간: ~' + item.endDate;
+  document.getElementById('couponUseModal').classList.remove('hide');
+}
+
+function closeCouponUseModal() {
+  document.getElementById('couponUseModal').classList.add('hide');
+  selectedCouponForUse = null;
+}
+
+function useCouponNow() {
+  if (!selectedCouponForUse) return;
+  // Mark as used
+  const wallet = DB.getAll('wallet');
+  const idx = wallet.findIndex(w => w.id === selectedCouponForUse.id);
+  if (idx >= 0) {
+    wallet[idx].used = true;
+    wallet[idx].usedAt = new Date().toISOString();
+    DB.set('wallet', wallet);
+  }
+  playSound('success');
+  spawnParticles(window.innerWidth / 2, window.innerHeight / 2, 15);
+  toast('쿠폰이 사용되었습니다! 매장에서 할인이 적용됩니다.');
+  addLog('쿠폰 사용: ' + selectedCouponForUse.name);
+  closeCouponUseModal();
+  refreshWallet();
+  updateStats();
+}
+
+function goToStore() {
+  if (!selectedCouponForUse) return;
+  const storeUrl = selectedCouponForUse.storeUrl;
+  if (storeUrl) {
+    window.open(storeUrl, '_blank');
+  } else {
+    // Navigate to merchant's store page within app
+    toast('매장 페이지로 이동합니다 (URL 미등록 시 앱 내 매장 페이지)');
+    closeCouponUseModal();
+    showPage('store');
+  }
+}
+
+/* ====== STATS ====== */
+function updateStats() {
+  const stores = DB.getAll('stores');
+  const coupons = DB.getAll('coupons');
+  const wallet = DB.getAll('wallet');
+  const gamePlays = DB.get('gamePlays') || 0;
+
+  const el = (id) => document.getElementById(id);
+  if (el('statStores')) el('statStores').textContent = stores.filter(s => s.status === 'approved').length;
+  if (el('statCoupons')) el('statCoupons').textContent = coupons.length;
+  if (el('statGames')) el('statGames').textContent = gamePlays;
+  if (el('statUsers')) el('statUsers').textContent = Math.max(1, wallet.length);
+}
+
+/* ====== ESCAPE KEY ====== */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hide'));
+  }
+});
+</script>
+</body>
+</html>
