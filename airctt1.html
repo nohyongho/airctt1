@@ -1,3 +1,190 @@
+<!--
+╔══════════════════════════════════════════════════════════════════╗
+║  AIRCTT 순환구조 완성 체크리스트 (기획 작업실행계획)                    ║
+║  AR멋찐게임 → 커머스 쇼핑 → 구름장터 → 완벽한 순환구조               ║
+║  최종 수정: 2026-02-24                                           ║
+╚══════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 🔄 AIRCTT 순환구조 (CIRCULAR FLOW)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [소비자]                                    [사업자]
+     │                                           │
+     ▼                                           ▼
+  ① 로그인 ─────────────────────── ② 매장 입점 신청
+     │                                           │
+     ▼                                           ▼
+  ③ AR 3D 쿠폰게임 ◄────────── ④ 쿠폰 발급 (장당₩100)
+     │ (쿠폰 획득!)                              │
+     ▼                                           ▼
+  ⑤ 쿠폰 지갑 ────────────────── ⑥ 관리자 승인
+     │ (쿠폰 확인/관리)                           │
+     ▼                                           ▼
+  ⑦ 매장 주문 (쿠폰 적용) ──────── ⑧ 주문 접수 (점주)
+     │                                           │
+     ▼                                           ▼
+  ⑨ 결제 (카드/현금/카카오) ────── ⑩ 매출/세무 관리
+     │                                           │
+     ▼                                           ▼
+  ⑪ 구름장터 (마켓플레이스) ◄───── ⑫ 매장 홈페이지 빌더
+     │                                           │
+     └──── 다시 게임 → 쿠폰 획득 → 주문 ─────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ✅ = 완료  |  🔧 = 기능 있으나 보강 필요  |  ❌ = 미구현
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+── A. 소비자 흐름 (Consumer Flow) ──────────────────────
+
+[✅] A1. 소셜 로그인 (구글/카카오/네이버/이메일)
+       - showPage('login'), handleLogin(), loginWithGoogle/Kakao/Naver
+       - Mock 로그인 동작 OK
+
+[✅] A2. AR 3D 쿠폰 게임
+       - Three.js 기반 3D 쿠폰 낙하 게임
+       - startGame(), initGame(), createCoupons(), catchCoupon()
+       - 승인된 매장 쿠폰만 게임에 배포 (gameIssuedCoupons)
+       - 희귀도 시스템: common/rare/epic/legendary/mythic
+       - 쿠폰 잔여수량 실시간 차감
+       - 무한 시간 모드
+
+[✅] A3. 쿠폰 지갑 (wallet-page)
+       - 쿠폰 목록 표시 (3D이미지, 희귀도 뱃지, 매장 링크)
+       - 필터: 전체/사용가능/사용완료
+       - 개별 삭제 & 전체 삭제
+       - 게임 획득 쿠폰 + Mock 쿠폰 + 레거시 쿠폰 병합
+       - localStorage 연동 (allCoupons 키)
+
+[✅] A4. 매장 주문 (store-page)
+       - 아미 한정식 메뉴 6종 (MENU_ITEMS)
+       - 수량 조절 (+/-), 장바구니 실시간 합계
+       - 쿠폰 적용 (selectCouponForStore)
+       - 주문 타입: 배달/픽업/예약
+       - 결제 수단: 카드/현금/계좌이체/카카오페이
+       - 주문 알림음 (점주에게)
+       - localStorage에 주문 기록
+
+[🔧] A5. 결제 시스템
+       - 현재: confirm() 다이얼로그 시뮬레이션
+       - 보강 필요: PG 연동 (pg-demo의 DAOU VAN 방식 적용 가능)
+       - pg-demo 백엔드(airctt.com)와 연결하면 실결제 가능
+
+[✅] A6. 구름장터 (마켓플레이스) ★ 순환구조 핵심 허브 — 구현완료!
+       - market-page: 5개 매장 그리드 (한식/카페/치킨/양식/패션)
+       - 카테고리 필터 (7종) + 검색 + 정렬 (추천/할인/거리/평점)
+       - 내 보유 쿠폰 요약 + 미니 슬라이더
+       - 인기 쿠폰 섹션 (gameIssuedCoupons 연동)
+       - 매장 카드: 평점, 리뷰수, 거리, 영업상태, 인기메뉴, 태그
+       - 매장 클릭 → store-page 이동 (ROUNZ는 외부 AR 링크)
+       - 사업자 등록 유도 배너 → business-page 연동
+       - Nav + Home 버튼 + showPage('market') 완전 연동
+
+── B. 사업자 흐름 (Business Flow) ─────────────────────
+
+[✅] B1. 매장 입점 신청 (4단계 위자드)
+       - Step1: 기본정보 (매장명, 업종, 사업자번호, 대표자)
+       - Step2: 운영정보 (주소, 전화, 영업시간)
+       - Step3: 약관동의 (서비스/개인정보/수수료/운영규정)
+       - Step4: 완료 → 관리자 승인 대기
+       - localStorage에 pendingStores 저장
+
+[✅] B2. 내 매장 관리 (business-mystore-tab)
+       - 승인된 매장 목록 (오늘 주문/매출)
+       - 대기중 매장 Lock 표시
+       - 매장 대시보드: 주문관리/매출/쿠폰/꾸미기
+       - 주문 접수/거절/완료
+
+[✅] B3. 쿠폰 발급 (business-coupon-issue-tab)
+       - 쿠폰명/할인/유형/수량/유효기간/조건
+       - 발급비용 자동계산 (장당 ₩100)
+       - 결제 확인 → 관리자 승인 대기
+       - 쿠폰관리 목록 (Enhanced v2 시스템)
+       - 새 쿠폰 모달 (2단계: 정보→결제)
+       - 배포 반경 지도 (Leaflet.js)
+       - AI 자동 생성
+
+[✅] B4. 홍보 페이지 (business-promo-tab)
+       - 20페이지까지 등록
+       - YouTube 영상 등록/미리보기
+       - 파일 업로드 (이미지/동영상/문서)
+
+[✅] B5. 매장 홈페이지 빌더 (store-builder-page)
+       - 기본정보/테마/SNS 편집
+       - 영업시간 설정
+       - 메뉴 관리 (추가/삭제/수정)
+       - 실시간 미리보기
+       - Supabase 저장 연동
+       - 전체화면 미리보기
+
+[✅] B6. Golden Rabbit CFO (🐰 AI 비서)
+       - 매출 분석 / 세무 안내 / 마케팅 전략
+       - 자유 질문 채팅
+       - 시뮬레이션 응답 (향후 Gemini API 연동)
+
+── C. 관리자 흐름 (Admin Flow) ────────────────────────
+
+[✅] C1. 최고관리자 대시보드 (admin-super)
+       - 승인 대기/완료 통계
+       - 실시간 알림 시스템 (알림음)
+       - 새 신청 알림 배너
+
+[✅] C2. 매장 관리 (admin-store)
+       - 매장 승인/거부/검토중
+       - 매장 ON/OFF 토글
+       - 사업자등록증 확인
+
+[✅] C3. 사용자 관리 (admin-users)
+       - 사용자 활성/비활성
+       - 사용자 검색
+
+[✅] C4. 쿠폰 승인 (admin-coupons)
+       - 대기 쿠폰 목록 (희귀도, 수량, 비용 표시)
+       - 승인 → 게임에 자동 배포 (gameIssuedCoupons.push)
+       - 거부 → 사유 입력
+       - 검토중 상태
+
+[✅] C5. 승인 기록 (admin-history)
+       - 날짜/유형/상태 기록
+       - 필터 (전체/매장/쿠폰/승인/거부)
+       - localStorage 영속 저장
+       - 엑셀 다운로드
+
+── D. 기술 인프라 ─────────────────────────────────────
+
+[✅] D1. 3D 배경 (Three.js 파티클)
+[✅] D2. Tailwind CSS (CDN)
+[✅] D3. GSAP/ScrollTrigger 애니메이션
+[🔧] D4. Supabase 연동 (매장 빌더만 - 다른 기능은 Mock)
+[🔧] D5. localStorage 데이터 (임시 → DB 전환 필요)
+[❌] D6. 백엔드 API 연동 (API_URL = localhost:5000 하드코딩)
+[❌] D7. 실 소셜 로그인 키 (현재 YOUR_xxx_KEY 플레이스홀더)
+[✅] D8. 외부 입점 매장 (ROUNZ AR 안경점 등 URL 연동)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 🎯 우선순위 작업 (순환구조 완성을 위한 핵심)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1위 ❌ A6. 구름장터 (Cloud Market) 신규 구현
+     → 순환구조의 핵심 허브! 이것 없이는 순환 불가
+     → 여러 매장 쿠폰을 마켓 형태로 탐색
+     → 카테고리/검색/인기순/거리순 정렬
+     → 매장 카드 클릭 → 해당 매장 주문 페이지
+
+  2위 🔧 D6. 백엔드 API 연동
+     → API_URL을 airctt.com으로 변경
+     → 또는 Supabase PostgREST 직접 연동
+     → 현재 모든 데이터가 Mock/localStorage
+
+  3위 🔧 A5. 실결제 연동
+     → pg-demo 백엔드 활용 가능
+     → DAOU VAN 시뮬레이터 연동
+
+  4위 🔧 D7. 소셜 로그인 실키 적용
+     → Google/Kakao/Naver 실제 API 키
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-->
 <!DOCTYPE html>\n<html lang="ko"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -357,6 +544,7 @@
       <a href="#" onclick="event.preventDefault(); showPage('home')">🏠 홈</a>
       <a href="#" onclick="event.preventDefault(); showPage('wallet')">💰 쿠폰 지갑</a>
       <a href="#" onclick="event.preventDefault(); showPage('business')">💼 사업자</a>
+      <a href="#" onclick="event.preventDefault(); showPage('market')" style="color:#22d3ee;">☁️ 구름장터</a>
       <a href="#" onclick="event.preventDefault(); showPage('store-builder')">🎨 매장꾸미기</a>
       <a href="#" onclick="event.preventDefault(); showPage('admin')">🔐 관리자</a>
       <a href="#" onclick="event.preventDefault(); startGame()">🎮 게임</a>
@@ -388,6 +576,7 @@
             <button onclick="startGame()" class="btn-primary">🎮 3D 쿠폰 게임</button>
             <button onclick="showPage('store')" class="btn-primary">🍽️ 주문하기</button>
             <button onclick="showPage('wallet')" class="btn-primary">💰 쿠폰 지갑</button>
+            <button onclick="showPage('market')" class="btn-primary" style="background:linear-gradient(135deg,#22d3ee,#a855f7);">☁️ 구름장터</button>
           </div>
         </div>
       </section>
@@ -2528,6 +2717,108 @@
       </div>
     </div>
 
+    <!-- ============================================ -->
+    <!-- ☁️ 구름장터 (Cloud Market) 페이지            -->
+    <!-- 순환구조 핵심 허브: 게임→지갑→구름장터→매장주문 -->
+    <!-- ============================================ -->
+    <div id="market-page" class="page">
+      <div class="max-w-7xl mx-auto px-4 py-20">
+
+        <!-- 구름장터 헤더 -->
+        <div class="text-center mb-10">
+          <h2 class="text-5xl font-black mb-3" style="background:linear-gradient(135deg,#22d3ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">☁️ 구름장터</h2>
+          <p class="text-xl text-gray-300 mb-2">Cloud Market — AR 쿠폰으로 만나는 동네 가게</p>
+          <p class="text-sm text-gray-500">게임에서 획득한 쿠폰을 여기서 사용하세요!</p>
+        </div>
+
+        <!-- 순환 흐름 안내 배너 -->
+        <div class="mb-8 p-4 rounded-xl border border-cyan-500/30" style="background:linear-gradient(135deg,rgba(34,211,238,0.08),rgba(168,85,247,0.08));">
+          <div class="flex items-center justify-center gap-3 flex-wrap text-sm md:text-base">
+            <span class="cursor-pointer hover:scale-110 transition" onclick="startGame()">🎮 AR게임</span>
+            <span class="text-cyan-400">→</span>
+            <span class="cursor-pointer hover:scale-110 transition" onclick="showPage('wallet')">💰 쿠폰획득</span>
+            <span class="text-cyan-400">→</span>
+            <span class="font-bold text-cyan-300 text-lg">☁️ 구름장터</span>
+            <span class="text-cyan-400">→</span>
+            <span class="cursor-pointer hover:scale-110 transition" onclick="showPage('store')">🛒 매장주문</span>
+            <span class="text-cyan-400">→</span>
+            <span class="text-purple-400">🔄 재방문</span>
+          </div>
+        </div>
+
+        <!-- 내 쿠폰 요약 -->
+        <div id="market-my-coupons" class="mb-8 p-5 rounded-xl card glow-border">
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h3 class="text-lg font-bold text-cyan-300">💰 내 보유 쿠폰</h3>
+              <p class="text-sm text-gray-400 mt-1">게임에서 획득한 쿠폰을 매장에서 사용하세요</p>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-center">
+                <span id="market-coupon-count" class="text-3xl font-black text-cyan-300">0</span>
+                <p class="text-xs text-gray-400">보유 쿠폰</p>
+              </div>
+              <button onclick="showPage('wallet')" class="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-500 text-sm font-bold">지갑 보기 →</button>
+            </div>
+          </div>
+          <!-- 쿠폰 미니 슬라이더 -->
+          <div id="market-coupon-slider" class="mt-4 flex gap-3 overflow-x-auto pb-2" style="scrollbar-width:thin;"></div>
+        </div>
+
+        <!-- 검색 & 카테고리 필터 -->
+        <div class="mb-6">
+          <div class="flex gap-3 mb-4 flex-wrap">
+            <div class="flex-1 min-w-[200px]">
+              <input type="text" id="market-search" placeholder="🔍 매장명 · 메뉴 · 쿠폰 검색..."
+                class="w-full p-3 rounded-xl bg-gray-900/80 border border-purple-500/50 focus:border-cyan-400 focus:outline-none transition"
+                oninput="filterMarket()">
+            </div>
+            <select id="market-sort" class="p-3 rounded-xl bg-gray-900/80 border border-purple-500/50" onchange="filterMarket()">
+              <option value="recommend">추천순</option>
+              <option value="discount">할인율순</option>
+              <option value="distance">거리순</option>
+              <option value="rating">평점순</option>
+            </select>
+          </div>
+          <div id="market-categories" class="flex gap-2 overflow-x-auto pb-2" style="scrollbar-width:thin;">
+            <button onclick="filterMarketCategory('all')" class="market-cat-btn active px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap" style="background:linear-gradient(135deg,#22d3ee,#a855f7);">전체</button>
+            <button onclick="filterMarketCategory('한식')" class="market-cat-btn px-4 py-2 rounded-full bg-gray-800 text-sm font-bold whitespace-nowrap hover:bg-gray-700">🍱 한식</button>
+            <button onclick="filterMarketCategory('카페')" class="market-cat-btn px-4 py-2 rounded-full bg-gray-800 text-sm font-bold whitespace-nowrap hover:bg-gray-700">☕ 카페</button>
+            <button onclick="filterMarketCategory('치킨')" class="market-cat-btn px-4 py-2 rounded-full bg-gray-800 text-sm font-bold whitespace-nowrap hover:bg-gray-700">🍗 치킨</button>
+            <button onclick="filterMarketCategory('양식')" class="market-cat-btn px-4 py-2 rounded-full bg-gray-800 text-sm font-bold whitespace-nowrap hover:bg-gray-700">🍝 양식</button>
+            <button onclick="filterMarketCategory('패션')" class="market-cat-btn px-4 py-2 rounded-full bg-gray-800 text-sm font-bold whitespace-nowrap hover:bg-gray-700">👓 패션</button>
+            <button onclick="filterMarketCategory('뷰티')" class="market-cat-btn px-4 py-2 rounded-full bg-gray-800 text-sm font-bold whitespace-nowrap hover:bg-gray-700">💇 뷰티</button>
+          </div>
+        </div>
+
+        <!-- 🔥 인기 쿠폰 섹션 -->
+        <div class="mb-8">
+          <h3 class="text-xl font-bold mb-4 text-yellow-400">🔥 지금 인기 쿠폰</h3>
+          <div id="market-hot-coupons" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <!-- JS로 동적 렌더링 -->
+          </div>
+        </div>
+
+        <!-- 매장 목록 그리드 -->
+        <div class="mb-6 flex items-center justify-between">
+          <h3 class="text-xl font-bold">🏪 동네 매장</h3>
+          <span id="market-store-count" class="text-sm text-gray-400">0개 매장</span>
+        </div>
+        <div id="market-store-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- JS로 동적 렌더링 -->
+        </div>
+
+        <!-- 사업자 등록 유도 배너 -->
+        <div class="mt-12 text-center p-8 rounded-2xl border border-dashed border-purple-500/40" style="background:linear-gradient(135deg,rgba(168,85,247,0.05),rgba(34,211,238,0.05));">
+          <p class="text-4xl mb-3">🐰</p>
+          <h4 class="text-xl font-bold mb-2 gradient-text">내 가게도 구름장터에 등록하세요!</h4>
+          <p class="text-gray-400 mb-4">쿠폰 발급 → AR 게임 배포 → 신규 고객 확보의 선순환!</p>
+          <button onclick="showPage('business')" class="px-6 py-3 rounded-xl font-bold text-white" style="background:linear-gradient(135deg,#a855f7,#22d3ee);">💼 사업자 등록하기</button>
+        </div>
+
+      </div>
+    </div>
+
     <!-- 로그인 페이지 -->
     <div id="login-page" class="page">
       <div class="max-w-md mx-auto px-4 py-20">
@@ -4313,10 +4604,12 @@
         } else if (pageName === 'store-builder') {
           renderMenuEditor();
           updateStorePreview();
+        } else if (pageName === 'market') {
+          loadMarketPage();
         } else if (pageName === 'admin') {
           loadAdminPage();
         }
-        
+
         // 스크롤 맨 위로
         window.scrollTo(0, 0);
       } catch (error) {
@@ -4324,13 +4617,350 @@
         alert('페이지 전환 오류: ' + error.message);
       }
     }
-    
+
+    // ============================================
+    // ☁️ 구름장터 (Cloud Market) — 순환구조 핵심 허브
+    // ============================================
+
+    // 구름장터 매장 데이터 (기존 STORES + 추가 매장)
+    const MARKET_STORES = [
+      {
+        id: 'ami-hansik',
+        name: '아미 한정식',
+        emoji: '🍱',
+        category: '한식',
+        description: '정성을 담아 만드는 건강한 한정식',
+        rating: 4.8,
+        reviewCount: 127,
+        distance: '350m',
+        openTime: '11:00 - 21:00',
+        isOpen: true,
+        tags: ['한식', '정식', '건강식'],
+        popularMenu: '특선 한정식 ₩15,000',
+        couponCount: 0,  // 동적으로 계산
+        image: null,
+        page: 'store'    // 클릭 시 이동할 페이지
+      },
+      {
+        id: 'ami-dabang',
+        name: '아미 다방',
+        emoji: '☕',
+        category: '카페',
+        description: '레트로 감성 카페, 수제 음료 전문',
+        rating: 4.6,
+        reviewCount: 89,
+        distance: '200m',
+        openTime: '09:00 - 22:00',
+        isOpen: true,
+        tags: ['카페', '수제음료', '디저트'],
+        popularMenu: '아미 블렌드 ₩5,500',
+        couponCount: 0,
+        image: null,
+        page: 'store'
+      },
+      {
+        id: 'golden-chicken',
+        name: '황금올리브 치킨',
+        emoji: '🍗',
+        category: '치킨',
+        description: '바삭한 올리브유 치킨의 정석',
+        rating: 4.7,
+        reviewCount: 256,
+        distance: '500m',
+        openTime: '15:00 - 01:00',
+        isOpen: true,
+        tags: ['치킨', '배달', '야식'],
+        popularMenu: '올리브 순살 ₩18,000',
+        couponCount: 0,
+        image: null,
+        page: 'store'
+      },
+      {
+        id: 'hyunsil-restaurant',
+        name: '현실 레스토랑',
+        emoji: '🍝',
+        category: '양식',
+        description: '현실적인 가격의 정통 이탈리안',
+        rating: 4.5,
+        reviewCount: 73,
+        distance: '800m',
+        openTime: '11:30 - 21:30',
+        isOpen: true,
+        tags: ['양식', '파스타', '스테이크'],
+        popularMenu: '트러플 파스타 ₩16,000',
+        couponCount: 0,
+        image: null,
+        page: 'store'
+      },
+      {
+        id: 'rounz-glasses',
+        name: 'ROUNZ 안경점',
+        emoji: '👓',
+        category: '패션',
+        description: 'AR 가상 피팅으로 안경 찾기',
+        rating: 4.9,
+        reviewCount: 45,
+        distance: '1.2km',
+        openTime: '10:00 - 20:00',
+        isOpen: true,
+        tags: ['패션', 'AR', '안경'],
+        popularMenu: 'AR 가상피팅 무료',
+        couponCount: 0,
+        image: null,
+        page: null,  // 외부 링크
+        externalUrl: 'https://rfrounz.com'
+      }
+    ];
+
+    let marketCurrentCategory = 'all';
+
+    function loadMarketPage() {
+      // 1. 보유 쿠폰 수 업데이트
+      updateMarketCouponSummary();
+      // 2. 인기 쿠폰 렌더링
+      renderHotCoupons();
+      // 3. 매장 그리드 렌더링
+      renderMarketStores();
+    }
+
+    function updateMarketCouponSummary() {
+      const coupons = JSON.parse(localStorage.getItem('allCoupons') || '[]');
+      const available = coupons.filter(c => !c.is_used);
+
+      // 쿠폰 수
+      const countEl = document.getElementById('market-coupon-count');
+      if (countEl) countEl.textContent = available.length;
+
+      // 쿠폰 미니 슬라이더
+      const slider = document.getElementById('market-coupon-slider');
+      if (!slider) return;
+
+      if (available.length === 0) {
+        slider.innerHTML = `
+          <div class="flex items-center gap-3 p-4 rounded-xl bg-gray-800/50 border border-dashed border-gray-600 min-w-[280px]">
+            <span class="text-3xl">🎮</span>
+            <div>
+              <p class="font-bold text-sm">아직 쿠폰이 없어요!</p>
+              <p class="text-xs text-gray-400">AR 게임에서 쿠폰을 획득해보세요</p>
+              <button onclick="startGame()" class="mt-1 text-xs text-cyan-400 hover:text-cyan-300 font-bold">게임 시작 →</button>
+            </div>
+          </div>`;
+        return;
+      }
+
+      slider.innerHTML = available.slice(0, 8).map(c => `
+        <div class="flex-shrink-0 p-3 rounded-xl border ${getRarityBorderClass(c.rarity)} min-w-[180px] cursor-pointer hover:scale-105 transition"
+             style="background:rgba(0,0,0,0.3);" onclick="showCouponFromMarket('${c.id}')">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="rarity-badge ${c.rarity || 'common'}" style="font-size:0.6rem;padding:0.15rem 0.5rem;">${(c.rarity || 'common').toUpperCase()}</span>
+          </div>
+          <p class="font-bold text-sm truncate">${c.title || c.name || '쿠폰'}</p>
+          <p class="text-xs text-cyan-400 mt-1">${formatCouponDiscount(c)}</p>
+        </div>
+      `).join('') + (available.length > 8 ? `
+        <div class="flex-shrink-0 flex items-center justify-center p-3 rounded-xl border border-gray-600 min-w-[100px] cursor-pointer hover:bg-gray-800"
+             onclick="showPage('wallet')">
+          <p class="text-sm text-gray-400">+${available.length - 8}개 더 →</p>
+        </div>` : '');
+
+      // 각 매장별 쿠폰 수 계산
+      MARKET_STORES.forEach(store => {
+        store.couponCount = available.filter(c =>
+          (c.store_name && c.store_name.includes(store.name)) ||
+          (c.business_name && c.business_name.includes(store.name))
+        ).length;
+      });
+    }
+
+    function getRarityBorderClass(rarity) {
+      const map = { common: 'border-gray-500', rare: 'border-blue-400', epic: 'border-purple-400', legendary: 'border-yellow-400', mythic: 'border-red-500' };
+      return map[rarity] || 'border-gray-500';
+    }
+
+    function formatCouponDiscount(c) {
+      if (c.discount_type === 'percentage') return `${c.discount_value}% 할인`;
+      if (c.discount_value) return `₩${Number(c.discount_value).toLocaleString()} 할인`;
+      return '특별 혜택';
+    }
+
+    function showCouponFromMarket(couponId) {
+      const coupons = JSON.parse(localStorage.getItem('allCoupons') || '[]');
+      const coupon = coupons.find(c => c.id === couponId);
+      if (coupon) {
+        showCouponDetail(coupon);
+      }
+    }
+
+    function renderHotCoupons() {
+      const container = document.getElementById('market-hot-coupons');
+      if (!container) return;
+
+      // 게임에서 승인된 쿠폰 = 인기 쿠폰
+      const hotCoupons = (typeof gameIssuedCoupons !== 'undefined' ? gameIssuedCoupons : [])
+        .filter(c => c.status === 'approved')
+        .slice(0, 4);
+
+      if (hotCoupons.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-6 text-gray-500">
+            <p class="text-2xl mb-2">📦</p>
+            <p class="text-sm">아직 등록된 인기 쿠폰이 없습니다</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = hotCoupons.map(c => `
+        <div class="p-4 rounded-xl border ${getRarityBorderClass(c.rarity)} cursor-pointer hover:scale-105 transition"
+             style="background:rgba(0,0,0,0.4);" onclick="marketUseCoupon('${c.id}')">
+          <div class="flex items-center justify-between mb-2">
+            <span class="rarity-badge ${c.rarity}" style="font-size:0.6rem;padding:0.15rem 0.5rem;">${(c.rarity).toUpperCase()}</span>
+            <span class="text-xs text-gray-400">${c.store_name || c.business_name || ''}</span>
+          </div>
+          <p class="font-bold text-sm mb-1 truncate">${c.title}</p>
+          <p class="text-cyan-400 text-sm font-bold">
+            ${c.discount_type === 'percentage' ? c.discount_value + '% OFF' : '₩' + Number(c.discount_value).toLocaleString() + ' 할인'}
+          </p>
+          <p class="text-xs text-gray-500 mt-1">남은 수량: ${c.total_quantity || '∞'}개</p>
+        </div>
+      `).join('');
+    }
+
+    function marketUseCoupon(couponId) {
+      const coupon = gameIssuedCoupons.find(c => c.id === couponId);
+      if (!coupon) return;
+
+      const storeName = coupon.store_name || coupon.business_name || '매장';
+      if (confirm(`"${coupon.title}" 쿠폰을 사용하여\n${storeName}에서 주문하시겠습니까?`)) {
+        showPage('store');
+      }
+    }
+
+    function renderMarketStores() {
+      const container = document.getElementById('market-store-grid');
+      const countEl = document.getElementById('market-store-count');
+      if (!container) return;
+
+      let stores = [...MARKET_STORES];
+
+      // 카테고리 필터
+      if (marketCurrentCategory !== 'all') {
+        stores = stores.filter(s => s.category === marketCurrentCategory || s.tags.includes(marketCurrentCategory));
+      }
+
+      // 검색 필터
+      const search = (document.getElementById('market-search')?.value || '').toLowerCase();
+      if (search) {
+        stores = stores.filter(s =>
+          s.name.toLowerCase().includes(search) ||
+          s.category.includes(search) ||
+          s.description.includes(search) ||
+          s.tags.some(t => t.includes(search))
+        );
+      }
+
+      // 정렬
+      const sort = document.getElementById('market-sort')?.value || 'recommend';
+      if (sort === 'rating') stores.sort((a, b) => b.rating - a.rating);
+      else if (sort === 'distance') stores.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+
+      if (countEl) countEl.textContent = `${stores.length}개 매장`;
+
+      if (stores.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-12">
+            <p class="text-4xl mb-3">🔍</p>
+            <p class="text-gray-400">검색 결과가 없습니다</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = stores.map(store => `
+        <div class="card glow-border cursor-pointer hover:scale-[1.02] transition-all duration-300"
+             onclick="${store.externalUrl ? `window.open('${store.externalUrl}','_blank')` : `goToStoreFromMarket('${store.id}')`}">
+
+          <!-- 매장 헤더 -->
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <span class="text-4xl">${store.emoji}</span>
+              <div>
+                <h4 class="text-lg font-bold">${store.name}</h4>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-yellow-400 text-sm">⭐ ${store.rating}</span>
+                  <span class="text-gray-500 text-xs">(${store.reviewCount})</span>
+                  <span class="text-gray-600 text-xs">·</span>
+                  <span class="text-gray-400 text-xs">📍 ${store.distance}</span>
+                </div>
+              </div>
+            </div>
+            <span class="px-2 py-1 rounded-full text-xs font-bold ${store.isOpen ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+              ${store.isOpen ? '영업중' : '준비중'}
+            </span>
+          </div>
+
+          <!-- 설명 -->
+          <p class="text-sm text-gray-400 mb-3">${store.description}</p>
+
+          <!-- 인기 메뉴 -->
+          <div class="flex items-center gap-2 mb-3 p-2 rounded-lg bg-gray-800/50">
+            <span class="text-xs text-gray-500">인기</span>
+            <span class="text-sm font-bold text-cyan-300">${store.popularMenu}</span>
+          </div>
+
+          <!-- 태그 -->
+          <div class="flex gap-1 flex-wrap mb-3">
+            ${store.tags.map(t => `<span class="px-2 py-0.5 bg-gray-800 rounded text-xs text-gray-400">#${t}</span>`).join('')}
+          </div>
+
+          <!-- 하단: 쿠폰 수 + 시간 -->
+          <div class="flex items-center justify-between pt-3 border-t border-gray-700/50">
+            <div class="flex items-center gap-1">
+              ${store.couponCount > 0
+                ? `<span class="text-sm text-purple-400 font-bold">🎟️ 사용가능 쿠폰 ${store.couponCount}장</span>`
+                : `<span class="text-xs text-gray-500">🕐 ${store.openTime}</span>`}
+            </div>
+            <span class="text-cyan-400 text-sm font-bold">${store.externalUrl ? 'AR 체험 →' : '주문하기 →'}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToStoreFromMarket(storeId) {
+      // 매장 상세 → store-page로 이동 (향후 매장별 분기 가능)
+      showPage('store');
+    }
+
+    function filterMarketCategory(category) {
+      marketCurrentCategory = category;
+
+      // 카테고리 버튼 활성화 상태 업데이트
+      document.querySelectorAll('.market-cat-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (category === 'all') {
+          btn.style.background = '';
+        } else {
+          btn.style.background = '';
+        }
+      });
+
+      // 클릭된 버튼 활성화
+      event.target.classList.add('active');
+      event.target.style.background = 'linear-gradient(135deg,#22d3ee,#a855f7)';
+
+      renderMarketStores();
+    }
+
+    function filterMarket() {
+      renderMarketStores();
+    }
+
+    // ============================================
     // 로그인
+    // ============================================
     async function handleLogin(e) {
       e.preventDefault();
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
-      
+
       currentUser = { email: email, name: '테스트 사용자' };
       authToken = 'mock-token';
       localStorage.setItem('token', authToken);
