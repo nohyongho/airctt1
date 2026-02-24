@@ -3621,7 +3621,8 @@
         remaining: 55,
         status: 'approved',
         expiry: '2026-05-31',
-        image_url: 'coupon-50.png'
+        image_url: 'coupon-50.png',
+        website_url: 'https://smartstore.naver.com/ami_hansik'
       },
       {
         id: 'store-coupon-002',
@@ -3636,7 +3637,8 @@
         remaining: 38,
         status: 'approved',
         expiry: '2026-03-15',
-        image_url: 'coupon-90-cafe.png'
+        image_url: 'coupon-90-cafe.png',
+        website_url: 'https://smartstore.naver.com/ami_dabang'
       },
       {
         id: 'store-coupon-003',
@@ -3651,7 +3653,8 @@
         remaining: 80,
         status: 'approved',
         expiry: '2026-05-31',
-        image_url: 'coupon-50.png'
+        image_url: 'coupon-50.png',
+        website_url: 'https://www.hyunsil.kr'
       },
       {
         id: 'store-coupon-004',
@@ -3666,7 +3669,8 @@
         remaining: 120,
         status: 'approved',
         expiry: '2026-12-31',
-        image_url: 'coupon-10.png'
+        image_url: 'coupon-10.png',
+        website_url: 'https://smartstore.naver.com/ami_hansik'
       },
       {
         id: 'store-coupon-005',
@@ -3681,16 +3685,17 @@
         remaining: 2,
         status: 'approved',
         expiry: '2026-01-31',
-        image_url: 'coupon-100.png'
+        image_url: 'coupon-100.png',
+        website_url: 'https://smartstore.naver.com/ami_hansik'
       }
     ];
     
     // 매장 데이터
     const STORES = {
-      'store-001': { name: '아미 한정식', emoji: '🍚', category: '한식', address: '서울시 강남구 테헤란로 123', status: 'approved' },
-      'store-002': { name: '아미 다방', emoji: '☕', category: '카페', address: '서울시 강남구', status: 'reviewing' },
-      'store-003': { name: '황금올리브 치킨', emoji: '🍗', category: '치킨', address: '서울시 송파구', status: 'pending' },
-      'store-004': { name: '현실 레스토랑', emoji: '🥩', category: '양식', address: '서울시 중랑구 면목동', status: 'approved' }
+      'store-001': { name: '아미 한정식', emoji: '🍚', category: '한식', address: '서울시 강남구 테헤란로 123', status: 'approved', website_url: 'https://smartstore.naver.com/ami_hansik' },
+      'store-002': { name: '아미 다방', emoji: '☕', category: '카페', address: '서울시 강남구', status: 'reviewing', website_url: 'https://smartstore.naver.com/ami_dabang' },
+      'store-003': { name: '황금올리브 치킨', emoji: '🍗', category: '치킨', address: '서울시 송파구', status: 'pending', website_url: 'https://www.bbq.co.kr' },
+      'store-004': { name: '현실 레스토랑', emoji: '🥩', category: '양식', address: '서울시 중랑구 면목동', status: 'approved', website_url: 'https://www.hyunsil.kr' }
     };
     
     // CTT products 테이블 스키마 기반
@@ -5203,7 +5208,7 @@
     async function loadMarketFromSupabase() {
       try {
         // 매장 데이터 로드
-        const dbStores = await sbFetch('stores', 'is_active=eq.true&select=id,name,description,category,address,phone,opening_hours,ar_url,merchant_id,merchants(name,type)');
+        const dbStores = await sbFetch('stores', 'is_active=eq.true&select=id,name,description,category,address,phone,opening_hours,ar_url,homepage_url,order_url,merchant_id,merchants(name,type,homepage_url)');
         if (dbStores && dbStores.length > 0) {
           console.log(`✅ Supabase 매장 ${dbStores.length}개 로드 완료`);
           // DB 매장을 MARKET_STORES에 병합
@@ -5217,6 +5222,7 @@
               existing.description = ds.description || existing.description;
               existing.address = ds.address || '';
               existing.phone = ds.phone || '';
+              existing.website_url = ds.homepage_url || ds.order_url || ds.merchants?.homepage_url || existing.website_url || null;
               existing.tags = [...new Set([...existing.tags, categoryKo[ds.category] || ds.category])];
             } else {
               // 새 매장 추가
@@ -5237,14 +5243,15 @@
                 couponCount: 0,
                 image: null,
                 page: 'store',
-                externalUrl: ds.ar_url || null
+                externalUrl: ds.ar_url || null,
+                website_url: ds.homepage_url || ds.order_url || ds.merchants?.homepage_url || null
               });
             }
           });
         }
 
         // 쿠폰 데이터 로드 (승인된 것만)
-        const dbCoupons = await sbFetch('coupons', 'is_active=eq.true&approval_status=eq.APPROVED&select=id,title,description,discount_type,discount_value,total_issuable,unit_price,store_id,stores(name),merchant_id,merchants(name)');
+        const dbCoupons = await sbFetch('coupons', 'is_active=eq.true&approval_status=eq.APPROVED&select=id,title,description,discount_type,discount_value,total_issuable,unit_price,asset_url,store_id,stores(name,homepage_url,order_url),merchant_id,merchants(name,homepage_url)');
         if (dbCoupons && dbCoupons.length > 0) {
           console.log(`✅ Supabase 쿠폰 ${dbCoupons.length}개 로드 완료`);
 
@@ -5277,6 +5284,8 @@
               status: 'approved',
               expiry: '2026-12-31',
               unit_price: Number(dc.unit_price) || 100,
+              image_url: dc.asset_url || null,
+              website_url: dc.stores?.homepage_url || dc.stores?.order_url || dc.merchants?.homepage_url || null,
               source: 'supabase'
             };
             if (existingIdx >= 0) {
@@ -5614,6 +5623,7 @@
           store_emoji: '🍚',
           is_used: false,
           is_active: true,
+          website_url: 'https://smartstore.naver.com/ami_hansik',
           valid_till: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
         },
         {
@@ -5630,6 +5640,7 @@
           store_emoji: '🍚',
           is_used: false,
           is_active: true,
+          website_url: 'https://smartstore.naver.com/ami_hansik',
           valid_till: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
         },
         {
@@ -5646,6 +5657,7 @@
           store_emoji: '🎮',
           is_used: false,
           is_active: true,
+          website_url: null,
           valid_till: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         }
       ];
@@ -5717,43 +5729,79 @@
         return `${month}/${day} ${hour}:${min}`;
       };
       
-      container.innerHTML = coupons.map(coupon => `
-        <div class="coupon-card ${coupon.rarity}" style="cursor:pointer; position:relative;">
-          <div class="flex items-center justify-between flex-wrap gap-4">
-            <!-- 🖼️ 쿠폰 3D 이미지 -->
-            <div class="flex items-center gap-4">
-              <div class="w-28 h-20 rounded-lg overflow-hidden bg-gray-800 flex-shrink-0" style="box-shadow: 0 4px 20px rgba(168,85,247,0.3);">
-                ${coupon.image_url ? 
-                  `<img src="${coupon.image_url}" alt="${coupon.title}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<div class=\\'w-full h-full flex items-center justify-center text-4xl\\'>${coupon.store_emoji || '🎫'}</div>';">` :
-                  `<div class="w-full h-full flex items-center justify-center text-4xl">${coupon.store_emoji || '🎫'}</div>`
-                }
+      container.innerHTML = coupons.map(coupon => {
+        // 사업자 웹사이트 URL 결정 (쿠폰 자체 > STORES 객체 > 기본)
+        const storeData = STORES[coupon.store_id];
+        const siteUrl = coupon.website_url || (storeData && storeData.website_url) || null;
+
+        // 쿠폰 이미지 소스 결정
+        const hasImage = coupon.image_url && (coupon.image_url.startsWith('http') || coupon.image_url.startsWith('data:') || coupon.image_url.startsWith('blob:'));
+
+        // 희귀도별 그라디언트 배경 (이미지 없을 때 사용)
+        const rarityGradients = {
+          common: 'linear-gradient(135deg, #4a5568, #2d3748)',
+          rare: 'linear-gradient(135deg, #2563eb, #1e40af)',
+          epic: 'linear-gradient(135deg, #9333ea, #6b21a8)',
+          legendary: 'linear-gradient(135deg, #f59e0b, #d97706)',
+          mythic: 'linear-gradient(135deg, #ef4444, #dc2626, #f59e0b)'
+        };
+        const bgGradient = rarityGradients[coupon.rarity] || rarityGradients.common;
+
+        return `
+        <div class="coupon-card ${coupon.rarity}" style="cursor:pointer; position:relative; overflow:hidden;"
+             onclick="${siteUrl ? `openCouponSite('${coupon.id}', '${siteUrl.replace(/'/g, "\\'")}')` : `goToStoreDetail('${coupon.store_id || 'store-001'}')`}">
+          <div class="flex gap-4" style="min-height: 120px;">
+            <!-- 🖼️ 쿠폰 이미지 (왼쪽 2/3) -->
+            <div class="relative flex-shrink-0 rounded-xl overflow-hidden" style="width: 55%; min-height: 120px; box-shadow: 0 4px 20px rgba(168,85,247,0.3);">
+              ${hasImage ?
+                `<img src="${coupon.image_url}" alt="${coupon.title}" class="w-full h-full object-cover" style="min-height:120px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                 <div class="w-full h-full items-center justify-center" style="display:none; background:${bgGradient}; min-height:120px;">
+                   <div class="text-center p-4">
+                     <div class="text-5xl mb-2">${coupon.store_emoji || '🎫'}</div>
+                     <div class="text-white font-bold text-lg">${coupon.discount_type === 'percentage' ? coupon.discount_value + '% OFF' : '₩' + coupon.discount_value.toLocaleString()}</div>
+                   </div>
+                 </div>` :
+                `<div class="w-full h-full flex items-center justify-center" style="background:${bgGradient}; min-height:120px;">
+                   <div class="text-center p-4">
+                     <div class="text-5xl mb-2">${coupon.store_emoji || '🎫'}</div>
+                     <div class="text-white font-bold text-lg">${coupon.discount_type === 'percentage' ? coupon.discount_value + '% OFF' : '₩' + coupon.discount_value.toLocaleString()}</div>
+                     <div class="text-white/60 text-xs mt-1">${coupon.business_name || coupon.store_name || ''}</div>
+                   </div>
+                 </div>`
+              }
+              <!-- 희귀도 배지 (이미지 위에 오버레이) -->
+              <div class="absolute top-2 left-2">
+                <span class="rarity-badge ${coupon.rarity}" style="font-size:10px; padding:2px 6px;">${coupon.rarity.toUpperCase()}</span>
               </div>
-              <div class="flex-1">
-                <span class="rarity-badge ${coupon.rarity}">${coupon.rarity.toUpperCase()}</span>
-                <h3 class="text-xl font-bold">${coupon.title}</h3>
-                <p class="text-gray-400 cursor-pointer hover:text-cyan-400 underline" onclick="event.stopPropagation(); goToStoreDetail('${coupon.store_id || 'store-001'}')">${coupon.store_emoji || '🏪'} ${coupon.business_name || coupon.store_name} →</p>
-                <!-- 📅 획득/갱신 시간 표시 -->
-                <p class="text-xs text-gray-500 mt-1">
-                  ${coupon.acquired_at ? `🕐 획득: ${formatDate(coupon.acquired_at)}` : ''}
-                  ${coupon.updated_at && coupon.updated_at !== coupon.acquired_at ? ` | 🔄 갱신: ${formatDate(coupon.updated_at)}` : ''}
+              ${coupon.is_used ? '<div class="absolute inset-0 bg-black/60 flex items-center justify-center"><span class="text-white font-bold text-lg rotate-[-15deg] border-2 border-white px-3 py-1 rounded">사용완료</span></div>' : ''}
+            </div>
+
+            <!-- 📋 쿠폰 정보 (오른쪽 1/3) -->
+            <div class="flex-1 flex flex-col justify-between py-1">
+              <div>
+                <h3 class="text-base font-bold leading-tight mb-1">${coupon.title}</h3>
+                <p class="text-gray-400 text-sm">${coupon.store_emoji || '🏪'} ${coupon.business_name || coupon.store_name || '게임 보상'}</p>
+                <p class="text-2xl font-black mt-2" style="color: ${coupon.rarity === 'legendary' || coupon.rarity === 'mythic' ? '#f59e0b' : '#06b6d4'};">
+                  ${coupon.discount_type === 'percentage' ? coupon.discount_value + '%' : '₩' + coupon.discount_value.toLocaleString()}
                 </p>
               </div>
-            </div>
-            <div class="text-right flex flex-col gap-2">
-              <p class="text-2xl font-bold text-cyan-400">
-                ${coupon.discount_type === 'percentage' ? coupon.discount_value + '%' : '₩' + coupon.discount_value.toLocaleString()}
-              </p>
-              <p class="text-sm ${coupon.is_used ? 'text-red-400' : 'text-green-400'}">
-                ${coupon.is_used ? '사용완료' : '사용가능'}
-              </p>
-              <div class="flex gap-2">
-                ${!coupon.is_used ? `<button onclick="event.stopPropagation(); useCouponAtStore('${coupon.id}')" class="px-3 py-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded font-bold text-xs hover:opacity-80 transition">🏪 매장</button>` : ''}
-                <button onclick="event.stopPropagation(); deleteSingleCoupon('${coupon.id}')" class="px-3 py-1 bg-red-600/50 hover:bg-red-600 rounded font-bold text-xs transition" title="쿠폰 삭제">🗑️</button>
+              <div>
+                <!-- 📅 시간 표시 -->
+                <p class="text-xs text-gray-500 mb-2">
+                  ${coupon.acquired_at ? `🕐 ${formatDate(coupon.acquired_at)}` : ''}
+                </p>
+                <!-- 버튼 영역 -->
+                <div class="flex gap-1.5">
+                  ${!coupon.is_used && siteUrl ? `<button onclick="event.stopPropagation(); openCouponSite('${coupon.id}', '${siteUrl.replace(/'/g, "\\'")}')" class="flex-1 px-2 py-1.5 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg font-bold text-xs hover:opacity-80 transition text-center">🌐 사용하기</button>` : ''}
+                  ${!coupon.is_used && !siteUrl ? `<button onclick="event.stopPropagation(); useCouponAtStore('${coupon.id}')" class="flex-1 px-2 py-1.5 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-lg font-bold text-xs hover:opacity-80 transition text-center">🏪 매장</button>` : ''}
+                  <button onclick="event.stopPropagation(); deleteSingleCoupon('${coupon.id}')" class="px-2 py-1.5 bg-red-600/30 hover:bg-red-600 rounded-lg font-bold text-xs transition" title="삭제">🗑️</button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
     
     function filterCoupons(status) {
@@ -5820,6 +5868,27 @@
       alert('🗑️ 쿠폰이 삭제되었습니다.');
     }
     
+    // 🌐 쿠폰 → 사업자 사이트로 이동
+    function openCouponSite(couponId, siteUrl) {
+      if (!siteUrl) {
+        alert('매장 사이트 정보가 없습니다.');
+        return;
+      }
+
+      const coupon = allCoupons.find(c => c.id === couponId);
+      const storeName = coupon ? (coupon.business_name || coupon.store_name || '매장') : '매장';
+      const storeEmoji = coupon ? (coupon.store_emoji || '🏪') : '🏪';
+      const discount = coupon ? (coupon.discount_type === 'percentage' ? coupon.discount_value + '%' : '₩' + coupon.discount_value.toLocaleString()) : '';
+
+      // 📱 사이트 이동 알림 (간략히)
+      if (typeof showToast === 'function') {
+        showToast(`${storeEmoji} ${storeName} 사이트로 이동! ${discount} 할인 쿠폰 적용`, 'coupon');
+      }
+
+      // 🔗 새 탭에서 사업자 사이트 열기
+      window.open(siteUrl, '_blank');
+    }
+
     // 🏪 매장 상세 페이지 이동
     function goToStoreDetail(storeId) {
       const store = STORES[storeId];
@@ -5857,11 +5926,19 @@
         alert('이미 사용된 쿠폰입니다.');
         return;
       }
-      
+
+      // ⭐ 사업자 사이트가 있으면 외부 사이트로 이동
+      const storeData = STORES[coupon.store_id];
+      const siteUrl = coupon.website_url || (storeData && storeData.website_url) || null;
+      if (siteUrl) {
+        openCouponSite(couponId, siteUrl);
+        return;
+      }
+
       // ⭐ 매장별 바로 이동 + 쿠폰 적용
       const storeName = coupon.business_name || coupon.store_name || '알 수 없는 매장';
       const storeEmoji = coupon.store_emoji || '🏪';
-      
+
       alert(`${storeEmoji} ${storeName} 매장으로 이동합니다!\n\n적용 쿠폰: ${coupon.title}\n할인: ${coupon.discount_type === 'percentage' ? coupon.discount_value + '%' : '₩' + coupon.discount_value.toLocaleString()}`);
       
       // 매장 페이지로 이동
@@ -7664,7 +7741,8 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
               store_name: c.store_name,
               store_id: c.store_id,
               store_emoji: c.store_emoji || '🏪',
-              image_url: c.image_url,
+              image_url: c.image_url || null,
+              website_url: c.website_url || null,
               is_used: false,
               acquired_at: now,
               updated_at: now
@@ -7679,6 +7757,8 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
               business_name: '게임 보상',
               store_id: 'game',
               store_emoji: '🎮',
+              image_url: null,
+              website_url: null,
               is_used: false,
               acquired_at: now,
               updated_at: now
