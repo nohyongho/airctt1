@@ -7389,8 +7389,8 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
         coupons.push(coupon);
       });
       
-      // 나머지는 기본 쿠폰으로 채우기 (최소 25개 — 화면 가득 비처럼!)
-      const minCoupons = 25;
+      // 나머지는 기본 쿠폰으로 채우기 (8~10개 — 적당히 떨어지게)
+      const minCoupons = 8;
       for (let i = coupons.length; i < minCoupons; i++) {
         const rand = Math.random();
         let rarity, randomCoupon;
@@ -9121,26 +9121,24 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
       </div>
     </div>
 
-    <!-- Step 1: Coupon Info -->
+    <!-- Step 1: 쿠폰 정보 -->
     <div id="modal-step-1" class="p-6 hidden">
       <!-- AI Auto Generate -->
       <button type="button" onclick="aiAutoFillCoupon()" class="w-full mb-5 p-3 rounded-lg border-2 border-dashed border-purple-500/50 hover:border-purple-400 transition text-center flex items-center justify-center gap-2 text-purple-400 hover:text-purple-300">
         ✨ AI 자동 생성
       </button>
 
-      <!-- 🖼️ 쿠폰 이미지/영상 업로드 -->
+      <!-- 🖼️ 쿠폰 업로드 -->
       <div class="mb-5">
-        <label class="block text-sm text-gray-400 mb-2">✨ 쿠폰 이미지/영상 업로드</label>
-        <!-- 프리뷰 카드 (업로드 후 표시) -->
+        <label class="block text-sm text-gray-400 mb-2">🎬 쿠폰 업로드 <span class="text-gray-600">JPG, PNG, GIF, MP4, WEBM (최대 500MB)</span></label>
+        <!-- 프리뷰 카드 -->
         <div id="modal-coupon-preview-card" class="hidden mb-3 bg-gray-800/80 rounded-xl border border-purple-500/30 overflow-hidden">
-          <div class="flex gap-0">
-            <!-- 좌측: 이미지/영상 프리뷰 (2/3) -->
-            <div id="modal-preview-media" class="w-2/3 relative bg-gray-900 flex items-center justify-center min-h-[180px]" onclick="document.getElementById('modal-coupon-image').click()" style="cursor:pointer;">
+          <div class="flex gap-0" style="aspect-ratio:720/450;">
+            <div id="modal-preview-media" class="w-2/3 relative bg-gray-900 flex items-center justify-center" onclick="document.getElementById('modal-coupon-image').click()" style="cursor:pointer;">
               <img id="modal-preview-img" class="w-full h-full object-cover" alt="쿠폰 프리뷰" style="display:none;">
               <video id="modal-preview-video" class="w-full h-full object-cover" autoplay muted loop style="display:none;"></video>
               <div id="modal-preview-change" class="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full" style="display:none;">📷 변경</div>
             </div>
-            <!-- 우측: 할인 정보 카드 (1/3) -->
             <div class="w-1/3 bg-gray-800 p-3 flex flex-col items-center justify-center border-l border-gray-700">
               <div class="text-2xl mb-1">🏷️</div>
               <p class="text-[10px] text-gray-400 mb-1">할인 정보</p>
@@ -9148,36 +9146,31 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
               <p class="text-xs text-gray-400 mt-0.5">OFF</p>
             </div>
           </div>
-          <p class="text-center text-[10px] text-gray-500 py-1.5">권장 사이즈: <span class="text-amber-400 font-bold">720 × 900px</span> (기로 2/3 이미지 + 1/3 할인정보)</p>
+          <p class="text-center text-[10px] text-gray-500 py-1.5">권장 사이즈: <span class="text-amber-400 font-bold">720 × 900px</span> (가로 2/3 이미지 + 1/3 할인정보)</p>
         </div>
-        <!-- 업로드 버튼 (초기 상태) -->
-        <div id="modal-image-placeholder" class="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center hover:border-purple-500/50 transition cursor-pointer group" onclick="document.getElementById('modal-coupon-image').click()">
-          <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-purple-500/20 to-cyan-500/20 flex items-center justify-center group-hover:scale-110 transition">
-            <span class="text-3xl">📸</span>
-          </div>
-          <p class="font-bold text-white mb-1">쿠폰 이미지/영상 업로드</p>
+        <!-- 업로드 버튼 -->
+        <div id="modal-image-placeholder" class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-purple-500/50 transition cursor-pointer group" onclick="document.getElementById('modal-coupon-image').click()">
+          <div class="w-14 h-14 mx-auto mb-2 rounded-2xl bg-gradient-to-br from-purple-500/20 to-cyan-500/20 flex items-center justify-center group-hover:scale-110 transition"><span class="text-2xl">📸</span></div>
+          <p class="font-bold text-white mb-1 text-sm">쿠폰 이미지/영상 업로드</p>
           <p class="text-xs text-gray-500">JPG, PNG, GIF, MP4, WEBM</p>
           <p class="text-xs text-gray-500 mt-1">권장: <span class="text-amber-400">720 × 900px</span></p>
-          <div class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-purple-500/20 text-purple-400 rounded-full text-xs font-medium">
-            <span>📁</span> 파일 선택하기
-          </div>
+          <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/20 text-purple-400 rounded-full text-xs font-medium"><span>📁</span> 파일 선택</div>
         </div>
-        <input type="file" id="modal-coupon-image" accept="image/*,video/mp4,video/webm" class="hidden" onchange="previewCouponImage(this)">
+        <input type="file" id="modal-coupon-image" accept="image/*,video/mp4,video/webm,.gif" class="hidden" onchange="previewCouponImage(this)">
       </div>
 
-      <!-- Coupon Name -->
+      <!-- 쿠폰명 -->
       <div class="mb-4">
         <label class="block text-sm text-gray-400 mb-1">쿠폰명 *</label>
         <input type="text" id="modal-coupon-name" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple-500 transition" placeholder="새 쿠폰" required="">
       </div>
-
-      <!-- Description -->
+      <!-- 설명 -->
       <div class="mb-4">
         <label class="block text-sm text-gray-400 mb-1">설명</label>
         <textarea id="modal-coupon-desc" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple-500 transition resize-y" rows="2" placeholder="쿠폰 설명"></textarea>
       </div>
 
-      <!-- Discount Type & Value -->
+      <!-- 할인 유형 & 값 -->
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
           <label class="block text-sm text-gray-400 mb-1">할인 유형</label>
@@ -9188,11 +9181,11 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
         </div>
         <div>
           <label class="block text-sm text-gray-400 mb-1">할인 값 *</label>
-          <input type="number" id="modal-discount-value" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple-500 transition" value="10" min="1" oninput="updatePreviewDiscount()">
+          <input type="number" id="modal-discount-value" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple-500 transition" value="10" min="1" max="100" oninput="updatePreviewDiscount()">
         </div>
       </div>
 
-      <!-- Start Date / End Date -->
+      <!-- 시작일/종료일 -->
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
           <label class="block text-sm text-gray-400 mb-1">시작일 *</label>
@@ -9204,7 +9197,7 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
         </div>
       </div>
 
-      <!-- Min Payment / Max Discount -->
+      <!-- 최소/최대 금액 -->
       <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
           <label class="block text-sm text-gray-400 mb-1">최소 결제 금액</label>
@@ -9216,13 +9209,13 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
         </div>
       </div>
 
-      <!-- Quantity -->
+      <!-- 발급 수량 -->
       <div class="mb-4">
         <label class="block text-sm text-gray-400 mb-1">발급 수량</label>
         <input type="number" id="modal-quantity" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple-500 transition" value="100" min="1" oninput="updateModalCost()">
       </div>
 
-      <!-- 배포 반경 (Distribution Radius) with Map -->
+      <!-- 배포 반경 -->
       <div class="mb-4 bg-gray-800/50 border border-green-500/30 rounded-xl p-4">
         <h4 class="font-bold text-green-400 flex items-center gap-2 mb-3">📍 배포 반경</h4>
         <div class="mb-3">
@@ -9231,12 +9224,11 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
             <option value="custom">커스텀 위치</option>
           </select>
         </div>
-        <!-- Map Container -->
-        <div id="modal-map-container" class="w-full h-[250px] rounded-lg overflow-hidden border border-gray-700 mb-3 relative">
-          <div id="coupon-radius-map" style="width: 100%; height: 100%;" class="" tabindex="0"></div>
+        <div id="modal-map-container" class="w-full h-[200px] rounded-lg overflow-hidden border border-gray-700 mb-3 relative">
+          <div id="coupon-radius-map" style="width: 100%; height: 100%;" tabindex="0"></div>
         </div>
         <div class="flex items-center justify-between text-sm mb-1">
-          <span class="text-purple-400 font-bold flex items-center gap-1">📍 반경: <span id="radius-display">115km</span></span>
+          <span class="text-purple-400 font-bold flex items-center gap-1">📍 반경: <span id="radius-display">5.0km</span></span>
           <span class="text-gray-500">50m ~ 20,000km</span>
         </div>
         <input type="range" id="modal-radius-slider" min="0" max="100" value="35" class="w-full accent-purple-500 cursor-pointer" oninput="updateRadiusDisplay(this.value)">
@@ -9245,53 +9237,137 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
         </div>
       </div>
 
-      <!-- Footer Buttons -->
-      <div class="flex justify-end gap-3 mt-6">
-        <button onclick="closeNewCouponModal()" class="px-6 py-3 rounded-lg bg-gray-800 text-gray-400 hover:bg-gray-700 transition">취소</button>
-        <button onclick="goToPaymentStep()" class="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-cyan-500 font-bold hover:opacity-90 transition">다음</button>
-      </div>
-    </div>
-
-    <!-- Step 2: Payment Confirmation -->
-    <div id="modal-step-2" class="p-6">
-      <div class="flex flex-col items-center mb-6">
-        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center mb-4">
-          <span class="text-3xl">⚡</span>
-        </div>
-        <h3 class="text-xl font-bold">결제 확인</h3>
-        <p class="text-gray-400 text-sm">쿠폰 생성 비용을 결제합니다</p>
-      </div>
-
-      <div class="bg-gray-800 rounded-xl p-5 mb-6 border border-gray-700">
-        <div class="flex justify-between py-2 border-b border-gray-700">
-          <span class="text-gray-400">쿠폰 종류</span>
-          <span class="font-bold" id="confirm-coupon-name">새 쿠폰</span>
-        </div>
-        <div class="flex justify-between py-2 border-b border-gray-700">
-          <span class="text-gray-400">발급 수량</span>
-          <span class="font-bold" id="confirm-quantity">100개</span>
-        </div>
-        <div class="flex justify-between py-2 border-b border-gray-700">
-          <span class="text-gray-400">기간</span>
-          <span class="font-bold" id="confirm-period">2026-02-22 ~ 2026-03-22</span>
-        </div>
-        <div class="flex justify-between py-2 border-b border-gray-700">
-          <span class="text-gray-400">배포 반경</span>
-          <span class="font-bold" id="confirm-radius">115km</span>
-        </div>
-        <div class="flex justify-between py-3 mt-2">
-          <span class="text-lg font-bold">총 결제 금액</span>
+      <!-- 비용 요약 바 -->
+      <div class="bg-gradient-to-r from-purple-900/50 to-cyan-900/50 rounded-xl p-4 border border-purple-500/30 mb-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-400">발급 수량: <span id="cost-bar-qty" class="text-white font-bold">100</span> 장</p>
+            <p class="text-xs text-gray-500">단가: 100원 / 장</p>
+          </div>
           <div class="text-right">
-            <span class="text-2xl font-bold text-cyan-400" id="confirm-total-cost">10,000원</span>
-            <p class="text-xs text-gray-500">1장당 100원 결제</p>
+            <p class="text-xs text-gray-400">💰 총 결제금액</p>
+            <p class="text-2xl font-black text-cyan-400" id="cost-bar-total">₩10,000</p>
           </div>
         </div>
       </div>
 
+      <!-- Footer -->
+      <div class="flex justify-end gap-3">
+        <button onclick="closeNewCouponModal()" class="px-6 py-3 rounded-lg bg-gray-800 text-gray-400 hover:bg-gray-700 transition">취소</button>
+        <button onclick="goToPaymentStep()" class="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-cyan-500 font-bold hover:opacity-90 transition">💳 결제 및 쿠폰 발급 신청</button>
+      </div>
+    </div>
+
+    <!-- Step 2: 결제 확인 배너 -->
+    <div id="modal-step-2" class="p-6 hidden">
+      <div class="flex flex-col items-center mb-5">
+        <div class="w-14 h-14 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center mb-3"><span class="text-2xl">⚡</span></div>
+        <h3 class="text-xl font-bold">결제 확인</h3>
+        <p class="text-gray-400 text-sm">아래 내용을 확인하고 결제를 진행합니다</p>
+      </div>
+
+      <div class="bg-gray-800 rounded-xl p-5 mb-5 border border-gray-700">
+        <div class="flex justify-between py-2 border-b border-gray-700"><span class="text-gray-400">쿠폰명</span><span class="font-bold" id="confirm-coupon-name">새 쿠폰</span></div>
+        <div class="flex justify-between py-2 border-b border-gray-700"><span class="text-gray-400">할인</span><span class="font-bold" id="confirm-discount">10%</span></div>
+        <div class="flex justify-between py-2 border-b border-gray-700"><span class="text-gray-400">발급 수량</span><span class="font-bold" id="confirm-quantity">100장</span></div>
+        <div class="flex justify-between py-2 border-b border-gray-700"><span class="text-gray-400">단가</span><span class="font-bold">100원/장</span></div>
+        <div class="flex justify-between py-2 border-b border-gray-700"><span class="text-gray-400">기간</span><span class="font-bold text-sm" id="confirm-period">2026-02-24 ~ 2026-03-24</span></div>
+        <div class="flex justify-between py-2 border-b border-gray-700"><span class="text-gray-400">배포 반경</span><span class="font-bold" id="confirm-radius">5.0km</span></div>
+        <div class="flex justify-between items-center py-3 mt-2 bg-gradient-to-r from-purple-900/30 to-cyan-900/30 rounded-lg px-3 -mx-1">
+          <span class="text-lg font-bold">💰 총 결제금액</span>
+          <span class="text-2xl font-black text-cyan-400" id="confirm-total-cost">₩10,000</span>
+        </div>
+      </div>
+      <p class="text-center text-sm text-yellow-400/80 mb-4">결제를 진행하시겠습니까?</p>
       <div class="flex justify-end gap-3">
         <button onclick="backToStep1()" class="px-6 py-3 rounded-lg bg-gray-800 text-gray-400 hover:bg-gray-700 transition">취소</button>
-        <button onclick="confirmCouponPayment()" class="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-cyan-500 font-bold hover:opacity-90 transition border border-cyan-400/30">결제하기</button>
+        <button onclick="goToPaymentMethodStep()" class="px-6 py-3 rounded-lg bg-gradient-to-r from-green-600 to-cyan-500 font-bold hover:opacity-90 transition border border-cyan-400/30">확인</button>
       </div>
+    </div>
+
+    <!-- Step 3: 결제 수단 선택 -->
+    <div id="modal-step-3" class="p-6 hidden">
+      <div class="flex flex-col items-center mb-5">
+        <div class="w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center mb-3"><span class="text-2xl">💳</span></div>
+        <h3 class="text-xl font-bold">결제 수단</h3>
+        <p class="text-gray-400 text-sm">결제 수단을 선택해 주세요</p>
+      </div>
+
+      <div class="bg-gradient-to-r from-purple-900/30 to-cyan-900/30 rounded-xl p-4 mb-5 border border-purple-500/20 text-center">
+        <p class="text-sm text-gray-400">💰 총 결제금액</p>
+        <p class="text-3xl font-black text-cyan-400" id="payment-total">₩10,000</p>
+      </div>
+
+      <!-- 결제 수단 그리드 -->
+      <div class="grid grid-cols-2 gap-3 mb-5" id="payment-method-grid">
+        <button onclick="selectPaymentMethod('card')" class="payment-method-btn p-4 rounded-xl border-2 border-gray-700 bg-gray-800/50 hover:border-purple-500 transition flex flex-col items-center gap-2" data-method="card">
+          <span class="text-3xl">💳</span><span class="font-bold text-sm">카드</span>
+        </button>
+        <button onclick="selectPaymentMethod('cash')" class="payment-method-btn p-4 rounded-xl border-2 border-gray-700 bg-gray-800/50 hover:border-purple-500 transition flex flex-col items-center gap-2" data-method="cash">
+          <span class="text-3xl">💵</span><span class="font-bold text-sm">현금</span>
+        </button>
+        <button onclick="selectPaymentMethod('transfer')" class="payment-method-btn p-4 rounded-xl border-2 border-gray-700 bg-gray-800/50 hover:border-purple-500 transition flex flex-col items-center gap-2" data-method="transfer">
+          <span class="text-3xl">🏦</span><span class="font-bold text-sm">계좌이체</span>
+        </button>
+        <button onclick="selectPaymentMethod('kakao')" class="payment-method-btn p-4 rounded-xl border-2 border-gray-700 bg-gray-800/50 hover:border-purple-500 transition flex flex-col items-center gap-2" data-method="kakao">
+          <span class="text-3xl">🟡</span><span class="font-bold text-sm">카카오페이</span>
+        </button>
+      </div>
+
+      <!-- 매장에서 할인 적용 안내 -->
+      <div class="bg-amber-900/20 border border-amber-500/30 rounded-xl p-3 mb-5">
+        <p class="text-xs text-amber-400">💡 결제 완료 후 (주)발로레 관리자 승인이 필요합니다. 승인 후 쿠폰이 게임에 자동 배포됩니다.</p>
+      </div>
+
+      <div class="flex justify-end gap-3">
+        <button onclick="backToStep2()" class="px-6 py-3 rounded-lg bg-gray-800 text-gray-400 hover:bg-gray-700 transition">이전</button>
+        <button id="btn-process-payment" onclick="processPayment()" class="px-6 py-3 rounded-lg bg-gradient-to-r from-green-600 to-cyan-500 font-bold hover:opacity-90 transition opacity-50 cursor-not-allowed" disabled>💳 즉시 결제하기</button>
+      </div>
+    </div>
+
+    <!-- Step 4: 발급 완료 (승인 대기) -->
+    <div id="modal-step-4" class="p-6 hidden">
+      <div class="flex flex-col items-center mb-6">
+        <div class="w-20 h-20 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 flex items-center justify-center mb-4 animate-bounce"><span class="text-4xl">🎉</span></div>
+        <h3 class="text-xl font-bold">쿠폰 발급 신청 완료!</h3>
+        <p class="text-gray-400 text-sm mt-1">(주)발로레 관리자 승인을 기다리고 있습니다</p>
+      </div>
+
+      <div class="bg-gray-800 rounded-xl p-5 mb-5 border border-gray-700">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center"><span class="text-xl">⏳</span></div>
+          <div>
+            <p class="font-bold text-yellow-400">승인 대기 중</p>
+            <p class="text-xs text-gray-500">관리자가 확인 후 승인합니다 (영업일 기준 1~2일)</p>
+          </div>
+        </div>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between"><span class="text-gray-400">쿠폰명</span><span class="font-bold" id="complete-coupon-name"></span></div>
+          <div class="flex justify-between"><span class="text-gray-400">발급 수량</span><span class="font-bold" id="complete-quantity"></span></div>
+          <div class="flex justify-between"><span class="text-gray-400">결제금액</span><span class="font-bold text-cyan-400" id="complete-amount"></span></div>
+          <div class="flex justify-between"><span class="text-gray-400">결제수단</span><span class="font-bold" id="complete-method"></span></div>
+        </div>
+      </div>
+
+      <!-- 순환 구조 안내 -->
+      <div class="bg-gradient-to-r from-purple-900/30 to-cyan-900/30 rounded-xl p-4 mb-5 border border-purple-500/20">
+        <p class="text-xs font-bold text-purple-400 mb-2">🔄 쿠폰 순환 구조</p>
+        <div class="flex items-center gap-1 text-xs text-gray-300 flex-wrap">
+          <span class="bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">✅ 발급신청</span>
+          <span>→</span>
+          <span class="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">⏳ 승인대기</span>
+          <span>→</span>
+          <span class="bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full">🎮 게임배포</span>
+          <span>→</span>
+          <span class="bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded-full">💰 지갑저장</span>
+          <span>→</span>
+          <span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full">🏪 매장사용</span>
+          <span>→</span>
+          <span class="bg-pink-500/20 text-pink-400 px-2 py-0.5 rounded-full">💵 수익순환</span>
+        </div>
+      </div>
+
+      <button onclick="closeNewCouponModal()" class="w-full py-3 rounded-lg bg-gradient-to-r from-purple-600 to-cyan-500 font-bold hover:opacity-90 transition text-center">✨ 확인</button>
     </div>
   </div>
 </div>
@@ -9366,6 +9442,8 @@ function initializeEnhancedCouponSystem() {
     window.couponManagementData.modalStep = 1;
     document.getElementById('modal-step-1').classList.remove('hidden');
     document.getElementById('modal-step-2').classList.add('hidden');
+    var step3 = document.getElementById('modal-step-3'); if (step3) step3.classList.add('hidden');
+    var step4 = document.getElementById('modal-step-4'); if (step4) step4.classList.add('hidden');
     updateStepIndicator(1);
     // Reset form
     document.getElementById('modal-coupon-name').value = '새 쿠폰';
@@ -9423,15 +9501,17 @@ function initializeEnhancedCouponSystem() {
   };
 
   window.updateStepIndicator = function(step) {
-    var d1 = document.getElementById('step-dot-1'), d2 = document.getElementById('step-dot-2'), ln = document.getElementById('step-line-1');
-    if (step === 1) {
-      d1.className = 'w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-sm font-bold';
-      d2.className = 'w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm font-bold';
-      ln.className = 'flex-1 h-0.5 bg-gray-700';
-    } else {
-      d1.className = 'w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-sm font-bold';
-      d2.className = 'w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-sm font-bold';
-      ln.className = 'flex-1 h-0.5 bg-purple-600';
+    for (var i = 1; i <= 4; i++) {
+      var dot = document.getElementById('step-dot-' + i);
+      var line = document.getElementById('step-line-' + i);
+      if (dot) {
+        if (i < step) dot.className = 'w-7 h-7 rounded-full bg-green-500 flex items-center justify-center text-xs font-bold shrink-0';
+        else if (i === step) dot.className = 'w-7 h-7 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold shrink-0';
+        else dot.className = 'w-7 h-7 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold shrink-0';
+      }
+      if (line) {
+        line.className = i < step ? 'flex-1 h-0.5 bg-green-500/50' : 'flex-1 h-0.5 bg-gray-700';
+      }
     }
   };
 
@@ -9444,26 +9524,70 @@ function initializeEnhancedCouponSystem() {
     if (!name) { alert('쿠폰명을 입력해주세요.'); return; }
     if (!startDate || !endDate) { alert('시작일과 종료일을 설정해주세요.'); return; }
     if (quantity < 1) { alert('발급 수량을 입력해주세요.'); return; }
+    var discType = document.getElementById('modal-discount-type').value;
+    var discValue = document.getElementById('modal-discount-value').value;
+    var discText = discType === 'percent' ? discValue + '%' : '₩' + Number(discValue).toLocaleString();
     document.getElementById('confirm-coupon-name').textContent = name;
-    document.getElementById('confirm-quantity').textContent = quantity + '개';
+    document.getElementById('confirm-discount').textContent = discText;
+    document.getElementById('confirm-quantity').textContent = quantity + '장';
     document.getElementById('confirm-period').textContent = startDate + ' ~ ' + endDate;
     var sliderVal = document.getElementById('modal-radius-slider').value;
     var km = sliderToRadius(sliderVal);
     document.getElementById('confirm-radius').textContent = formatRadius(km);
-    document.getElementById('confirm-total-cost').textContent = (quantity * 100).toLocaleString() + '원';
+    document.getElementById('confirm-total-cost').textContent = '₩' + (quantity * 100).toLocaleString();
     document.getElementById('modal-step-1').classList.add('hidden');
     document.getElementById('modal-step-2').classList.remove('hidden');
+    var s3 = document.getElementById('modal-step-3'); if(s3) s3.classList.add('hidden');
+    var s4 = document.getElementById('modal-step-4'); if(s4) s4.classList.add('hidden');
     updateStepIndicator(2);
   };
 
   window.backToStep1 = function() {
     document.getElementById('modal-step-1').classList.remove('hidden');
     document.getElementById('modal-step-2').classList.add('hidden');
+    var s3 = document.getElementById('modal-step-3'); if(s3) s3.classList.add('hidden');
+    var s4 = document.getElementById('modal-step-4'); if(s4) s4.classList.add('hidden');
     updateStepIndicator(1);
     setTimeout(initCouponMap, 300);
   };
 
-  window.confirmCouponPayment = function() {
+  window.backToStep2 = function() {
+    document.getElementById('modal-step-2').classList.remove('hidden');
+    var s3 = document.getElementById('modal-step-3'); if(s3) s3.classList.add('hidden');
+    updateStepIndicator(2);
+  };
+
+  window.goToPaymentMethodStep = function() {
+    var quantity = parseInt(document.getElementById('modal-quantity').value) || 100;
+    document.getElementById('payment-total').textContent = '₩' + (quantity * 100).toLocaleString();
+    document.getElementById('modal-step-2').classList.add('hidden');
+    var s3 = document.getElementById('modal-step-3'); if(s3) s3.classList.remove('hidden');
+    // 결제 수단 초기화
+    window._selectedPayMethod = null;
+    document.querySelectorAll('.payment-method-btn').forEach(function(b) { b.classList.remove('border-purple-500', 'bg-purple-500/20'); b.classList.add('border-gray-700'); });
+    var btn = document.getElementById('btn-process-payment');
+    if (btn) { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); }
+    updateStepIndicator(3);
+  };
+
+  window.selectPaymentMethod = function(method) {
+    window._selectedPayMethod = method;
+    document.querySelectorAll('.payment-method-btn').forEach(function(b) {
+      if (b.getAttribute('data-method') === method) {
+        b.classList.remove('border-gray-700');
+        b.classList.add('border-purple-500', 'bg-purple-500/20');
+      } else {
+        b.classList.remove('border-purple-500', 'bg-purple-500/20');
+        b.classList.add('border-gray-700');
+      }
+    });
+    var btn = document.getElementById('btn-process-payment');
+    if (btn) { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); }
+  };
+
+  window.processPayment = function() {
+    if (!window._selectedPayMethod) { alert('결제 수단을 선택해 주세요.'); return; }
+    var methodNames = { card: '💳 카드', cash: '💵 현금', transfer: '🏦 계좌이체', kakao: '🟡 카카오페이' };
     var name = document.getElementById('modal-coupon-name').value.trim();
     var desc = document.getElementById('modal-coupon-desc').value.trim();
     var discType = document.getElementById('modal-discount-type').value;
@@ -9475,19 +9599,68 @@ function initializeEnhancedCouponSystem() {
     var maxDiscount = parseInt(document.getElementById('modal-max-discount').value) || 0;
     var sliderVal = document.getElementById('modal-radius-slider').value;
     var km = sliderToRadius(sliderVal);
+
+    // 새 쿠폰 데이터 생성 (pending 상태 — 관리자 승인 대기)
     var newCoupon = {
       id: Date.now(), name: name,
-      description: desc || (discValue + (discType === 'percent' ? '% discount on ' : '원 discount on ') + name),
+      description: desc || (discValue + (discType === 'percent' ? '% 할인 ' : '원 할인 ') + name),
       discountType: discType, discountValue: discValue, quantity: quantity, used: 0,
       startDate: startDate, endDate: endDate, status: 'pending',
       rarity: discValue >= 50 ? 'EPIC' : (discValue >= 30 ? 'RARE' : 'COMMON'),
-      radius: km, minPayment: minPayment, maxDiscount: maxDiscount, image: null
+      radius: km, minPayment: minPayment, maxDiscount: maxDiscount, image: null,
+      paymentMethod: window._selectedPayMethod,
+      paymentAmount: quantity * 100,
+      createdAt: new Date().toISOString()
     };
     window.couponManagementData.coupons.unshift(newCoupon);
-    closeNewCouponModal();
+
+    // Step 4: 완료 화면으로
+    document.getElementById('complete-coupon-name').textContent = name;
+    document.getElementById('complete-quantity').textContent = quantity + '장';
+    document.getElementById('complete-amount').textContent = '₩' + (quantity * 100).toLocaleString();
+    document.getElementById('complete-method').textContent = methodNames[window._selectedPayMethod] || '카드';
+
+    var s3 = document.getElementById('modal-step-3'); if(s3) s3.classList.add('hidden');
+    var s4 = document.getElementById('modal-step-4'); if(s4) s4.classList.remove('hidden');
+    updateStepIndicator(4);
+
     renderCouponManagementList();
     updateCouponStats();
-    showCouponNotification('쿠폰이 성공적으로 생성되었습니다! (' + quantity + '장, ' + (quantity * 100).toLocaleString() + '원)', 'success');
+    showCouponNotification('쿠폰 발급 신청 완료! (' + quantity + '장, ₩' + (quantity * 100).toLocaleString() + ') — 관리자 승인 대기 중', 'success');
+
+    // ⭐ 게임에도 pending 쿠폰으로 등록 (승인 후 activated)
+    if (typeof gameIssuedCoupons !== 'undefined') {
+      var storeEmoji = '🏪';
+      var storeId = 'store-001';
+      if (typeof currentUser !== 'undefined' && currentUser && currentUser.store_id) {
+        storeId = currentUser.store_id;
+      }
+      gameIssuedCoupons.push({
+        id: 'new-coupon-' + newCoupon.id,
+        store_id: storeId,
+        store_name: name.split(' ')[0],
+        store_emoji: storeEmoji,
+        title: name,
+        discount_type: discType === 'percent' ? 'percentage' : 'fixed',
+        discount_value: discValue,
+        rarity: newCoupon.rarity.toLowerCase(),
+        total_quantity: quantity,
+        remaining: quantity,
+        status: 'pending',
+        expiry: endDate,
+        image_url: null,
+        website_url: null
+      });
+    }
+  };
+
+  // 비용 바 업데이트 (발급 수량 변경 시)
+  window.updateModalCost = function() {
+    var qty = parseInt(document.getElementById('modal-quantity').value) || 0;
+    var costBarQty = document.getElementById('cost-bar-qty');
+    var costBarTotal = document.getElementById('cost-bar-total');
+    if (costBarQty) costBarQty.textContent = qty;
+    if (costBarTotal) costBarTotal.textContent = '₩' + (qty * 100).toLocaleString();
   };
 
   window.showCouponNotification = function(message, type) {
