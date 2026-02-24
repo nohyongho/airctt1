@@ -8996,15 +8996,21 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
         </div>
         <button onclick="closeNewCouponModal()" class="text-gray-400 hover:text-white text-2xl">×</button>
       </div>
-      <!-- Step Indicator -->
-      <div class="flex items-center gap-2 mt-4">
-        <div id="step-dot-1" class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-sm font-bold">1</div>
-        <div class="flex-1 h-0.5 bg-purple-600" id="step-line-1"></div>
-        <div id="step-dot-2" class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-sm font-bold">2</div>
+      <!-- Step Indicator (4단계) -->
+      <div class="flex items-center gap-1 mt-4">
+        <div id="step-dot-1" class="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center text-xs font-bold shrink-0">1</div>
+        <div class="flex-1 h-0.5 bg-green-500/50" id="step-line-1"></div>
+        <div id="step-dot-2" class="w-7 h-7 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold shrink-0">2</div>
+        <div class="flex-1 h-0.5 bg-gray-700" id="step-line-2"></div>
+        <div id="step-dot-3" class="w-7 h-7 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold shrink-0">3</div>
+        <div class="flex-1 h-0.5 bg-gray-700" id="step-line-3"></div>
+        <div id="step-dot-4" class="w-7 h-7 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold shrink-0">4</div>
       </div>
-      <div class="flex justify-between text-xs text-gray-400 mt-1">
-        <span>쿠폰 정보</span>
-        <span>결제 확인</span>
+      <div class="flex justify-between text-[10px] text-gray-400 mt-1 px-0.5">
+        <span>쿠폰<br>정보</span>
+        <span>비교<br>생성</span>
+        <span>관리<br>확인</span>
+        <span>요청<br>완료</span>
       </div>
     </div>
 
@@ -9015,21 +9021,41 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
         ✨ AI 자동 생성
       </button>
 
-      <!-- Coupon Image Upload -->
+      <!-- 🖼️ 쿠폰 이미지/영상 업로드 -->
       <div class="mb-5">
-        <label class="block text-sm text-gray-400 mb-2">쿠폰 파일</label>
-        <div class="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center hover:border-purple-500/50 transition cursor-pointer" onclick="document.getElementById('modal-coupon-image').click()">
-          <div id="modal-image-preview" class="hidden mb-3">
-            <img id="modal-preview-img" class="max-h-32 mx-auto rounded" alt="preview">
+        <label class="block text-sm text-gray-400 mb-2">✨ 쿠폰 이미지/영상 업로드</label>
+        <!-- 프리뷰 카드 (업로드 후 표시) -->
+        <div id="modal-coupon-preview-card" class="hidden mb-3 bg-gray-800/80 rounded-xl border border-purple-500/30 overflow-hidden">
+          <div class="flex gap-0">
+            <!-- 좌측: 이미지/영상 프리뷰 (2/3) -->
+            <div id="modal-preview-media" class="w-2/3 relative bg-gray-900 flex items-center justify-center min-h-[180px]" onclick="document.getElementById('modal-coupon-image').click()" style="cursor:pointer;">
+              <img id="modal-preview-img" class="w-full h-full object-cover" alt="쿠폰 프리뷰" style="display:none;">
+              <video id="modal-preview-video" class="w-full h-full object-cover" autoplay muted loop style="display:none;"></video>
+              <div id="modal-preview-change" class="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full" style="display:none;">📷 변경</div>
+            </div>
+            <!-- 우측: 할인 정보 카드 (1/3) -->
+            <div class="w-1/3 bg-gray-800 p-3 flex flex-col items-center justify-center border-l border-gray-700">
+              <div class="text-2xl mb-1">🏷️</div>
+              <p class="text-[10px] text-gray-400 mb-1">할인 정보</p>
+              <div id="modal-preview-discount" class="text-2xl font-black text-amber-400">10%</div>
+              <p class="text-xs text-gray-400 mt-0.5">OFF</p>
+            </div>
           </div>
-          <div id="modal-image-placeholder">
-            <span class="text-3xl block mb-2">🖼️</span>
-            <p class="font-bold">쿠폰 업로드</p>
-            <p class="text-xs text-gray-500 mt-1">JPG, PNG, GIF, MP4, WEBM (최대 100MB)</p>
-            <p class="text-xs text-gray-500">권장 사이즈: 500x500px</p>
-          </div>
-          <input type="file" id="modal-coupon-image" accept="image/*,video/mp4,video/webm" class="hidden" onchange="previewCouponImage(this)">
+          <p class="text-center text-[10px] text-gray-500 py-1.5">권장 사이즈: <span class="text-amber-400 font-bold">720 × 900px</span> (기로 2/3 이미지 + 1/3 할인정보)</p>
         </div>
+        <!-- 업로드 버튼 (초기 상태) -->
+        <div id="modal-image-placeholder" class="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center hover:border-purple-500/50 transition cursor-pointer group" onclick="document.getElementById('modal-coupon-image').click()">
+          <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-purple-500/20 to-cyan-500/20 flex items-center justify-center group-hover:scale-110 transition">
+            <span class="text-3xl">📸</span>
+          </div>
+          <p class="font-bold text-white mb-1">쿠폰 이미지/영상 업로드</p>
+          <p class="text-xs text-gray-500">JPG, PNG, GIF, MP4, WEBM</p>
+          <p class="text-xs text-gray-500 mt-1">권장: <span class="text-amber-400">720 × 900px</span></p>
+          <div class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-purple-500/20 text-purple-400 rounded-full text-xs font-medium">
+            <span>📁</span> 파일 선택하기
+          </div>
+        </div>
+        <input type="file" id="modal-coupon-image" accept="image/*,video/mp4,video/webm" class="hidden" onchange="previewCouponImage(this)">
       </div>
 
       <!-- Coupon Name -->
@@ -9054,8 +9080,8 @@ ${cart.map(item => `${item.name} x ${item.quantity}`).join('\n')}
           </select>
         </div>
         <div>
-          <label class="block text-sm text-gray-400 mb-1">할인 값</label>
-          <input type="number" id="modal-discount-value" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple-500 transition" value="10" min="1">
+          <label class="block text-sm text-gray-400 mb-1">할인 값 *</label>
+          <input type="number" id="modal-discount-value" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple-500 transition" value="10" min="1" oninput="updatePreviewDiscount()">
         </div>
       </div>
 
@@ -9243,8 +9269,18 @@ function initializeEnhancedCouponSystem() {
     document.getElementById('modal-max-discount').value = '5000';
     document.getElementById('modal-radius-slider').value = '35';
     document.getElementById('radius-display').textContent = '5.0km';
-    document.getElementById('modal-image-preview').classList.add('hidden');
+    // 프리뷰 리셋
+    var previewCard = document.getElementById('modal-coupon-preview-card');
+    if (previewCard) previewCard.classList.add('hidden');
+    var imgEl = document.getElementById('modal-preview-img');
+    var videoEl = document.getElementById('modal-preview-video');
+    if (imgEl) { imgEl.style.display = 'none'; imgEl.src = ''; }
+    if (videoEl) { videoEl.style.display = 'none'; videoEl.src = ''; }
+    var changeBtn = document.getElementById('modal-preview-change');
+    if (changeBtn) changeBtn.style.display = 'none';
     document.getElementById('modal-image-placeholder').classList.remove('hidden');
+    var previewDiscount = document.getElementById('modal-preview-discount');
+    if (previewDiscount) previewDiscount.textContent = '10%';
     setTimeout(initCouponMap, 300);
   };
 
@@ -9363,13 +9399,55 @@ function initializeEnhancedCouponSystem() {
 
   window.previewCouponImage = function(input) {
     if (input.files && input.files[0]) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('modal-preview-img').src = e.target.result;
-        document.getElementById('modal-image-preview').classList.remove('hidden');
-        document.getElementById('modal-image-placeholder').classList.add('hidden');
-      };
-      reader.readAsDataURL(input.files[0]);
+      var file = input.files[0];
+      var isVideo = file.type.startsWith('video/');
+      var url = URL.createObjectURL(file);
+
+      var previewCard = document.getElementById('modal-coupon-preview-card');
+      var placeholder = document.getElementById('modal-image-placeholder');
+      var imgEl = document.getElementById('modal-preview-img');
+      var videoEl = document.getElementById('modal-preview-video');
+      var changeBtn = document.getElementById('modal-preview-change');
+
+      // 프리뷰 카드 표시, 플레이스홀더 숨김
+      if (previewCard) previewCard.classList.remove('hidden');
+      if (placeholder) placeholder.classList.add('hidden');
+      if (changeBtn) changeBtn.style.display = '';
+
+      if (isVideo) {
+        // 비디오 프리뷰
+        if (imgEl) imgEl.style.display = 'none';
+        if (videoEl) {
+          videoEl.src = url;
+          videoEl.style.display = 'block';
+          videoEl.play().catch(function(){});
+        }
+      } else {
+        // 이미지 프리뷰
+        if (videoEl) videoEl.style.display = 'none';
+        if (imgEl) {
+          imgEl.src = url;
+          imgEl.style.display = 'block';
+        }
+      }
+
+      // 할인 정보 동기화
+      updatePreviewDiscount();
+    }
+  };
+
+  // 프리뷰 카드의 할인 정보를 현재 입력값과 동기화
+  window.updatePreviewDiscount = function() {
+    var typeEl = document.getElementById('modal-discount-type');
+    var valueEl = document.getElementById('modal-discount-value');
+    var previewEl = document.getElementById('modal-preview-discount');
+    if (!previewEl || !typeEl || !valueEl) return;
+    var val = valueEl.value || '10';
+    var type = typeEl.value;
+    if (type === 'percent') {
+      previewEl.textContent = val + '%';
+    } else {
+      previewEl.textContent = '₩' + Number(val).toLocaleString();
     }
   };
 
@@ -9378,6 +9456,8 @@ function initializeEnhancedCouponSystem() {
     var input = document.getElementById('modal-discount-value');
     if (type === 'percent') { input.max = 100; input.placeholder = '10'; }
     else { input.max = 999999; input.placeholder = '5000'; }
+    // 프리뷰 할인 정보도 실시간 업데이트
+    updatePreviewDiscount();
   };
 
   // ---- List Rendering ----
